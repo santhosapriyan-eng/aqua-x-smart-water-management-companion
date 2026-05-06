@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="AquaX - Campus Water & Disaster Management Platform" />
+  <title>AquaX — Smart Water & Disaster Management</title>
+  <link rel="stylesheet" href="styles/base.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="/socket.io/socket.io.js"></script>
+  <script defer src="scripts/splash.js"></script>
+  <script defer src="scripts/voice.js"></script>
+  <script defer src="scripts/lang.js"></script>
+</head>
+<body>
+  <!-- Splash Screen -->
+  <div class="splash">
+    <div class="splash-inner">
+      <div class="splash-logo">
+        <div class="water-drop">
+          <div class="ripple"></div>
+          <div class="ripple delay-1"></div>
+          <div class="ripple delay-2"></div>
+        </div>
+      </div>
+      <h1 class="splash-title">AquaX</h1>
+      <p class="splash-sub">Smart Campus Water & Disaster Management Platform</p>
+      <div class="partners">
+        <span>Powered by Google Cloud</span>
+        <span>•</span>
+        <span>GeeksforGeeks</span>
+        <span>•</span>
+        <span>Karunya University</span>
+      </div>
+      <div class="splash-actions">
+        <a class="btn primary pulse" href="citizen.html">Enter Portal</a>
+        <a class="btn secondary" href="map.html">Live Water Map</a>
+      </div>
+      <div class="accessibility-notes">
+        <small>Accessible via Web, SMS, IVR & Mobile App</small>
+        <small>Supports: English, हिन्दी, தமிழ், తెలుగు, ಕನ್ನಡ, മലയാളം</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Application -->
+  <div class="main hidden">
+    <!-- Header with Navigation -->
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">💧</div>
+        <span>AquaX</span>
+      </div>
+      <nav class="nav" role="navigation" aria-label="Main Navigation">
+        <a href="citizen.html" class="nav-link">
+          <span class="nav-icon">👥</span>
+          <span class="nav-text">Citizen</span>
+        </a>
+        <a href="map.html" class="nav-link">
+          <span class="nav-icon">🗺️</span>
+          <span class="nav-text">Live Map</span>
+        </a>
+        <a href="chat.html" class="nav-link">
+          <span class="nav-icon">🤖</span>
+          <span class="nav-text">AI Assistant</span>
+        </a>
+        <a href="authority.html" class="nav-link">
+          <span class="nav-icon">🏢</span>
+          <span class="nav-text">Authorities</span>
+        </a>
+        <a href="leaderboard.html" class="nav-link">
+          <span class="nav-icon">🏆</span>
+          <span class="nav-text">Leaderboard</span>
+        </a>
+      </nav>
+      <div class="controls">
+        <button id="accessibilityToggle" class="btn icon" aria-label="Accessibility Options">♿</button>
+        <button id="voiceControl" class="btn icon" aria-label="Voice Control">🎤</button>
+        <select id="langSwitcher" class="lang-selector">
+          <option value="en">English</option>
+          <option value="hi">हिन्दी</option>
+          <option value="ta">தமிழ்</option>
+          <option value="te">తెలుగు</option>
+          <option value="kn">ಕನ್ನಡ</option>
+          <option value="ml">മലയാളം</option>
+        </select>
+      </div>
+    </header>
+
+    <!-- Accessibility Panel -->
+    <div id="accessibilityPanel" class="accessibility-panel hidden">
+      <h4>Accessibility Options</h4>
+      <div class="accessibility-options">
+        <label>
+          <input type="checkbox" id="highContrast"> High Contrast
+        </label>
+        <label>
+          <input type="checkbox" id="largeText"> Large Text
+        </label>
+        <label>
+          <input type="checkbox" id="screenReader"> Screen Reader Support
+        </label>
+        <label>
+          <input type="checkbox" id="voiceNavigation"> Voice Navigation
+        </label>
+      </div>
+      <button class="btn small" id="closeAccessibility">Close</button>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container">
+      <!-- Hero Section -->
+      <section class="hero">
+        <div class="hero-content">
+          <h1>Welcome to AquaX</h1>
+          <p class="lead">Revolutionizing campus water management, disaster response, and essential services through AI-powered technology.</p>
+          <div class="hero-stats">
+            <div class="stat">
+              <span class="stat-number" id="activeUsers">1,247</span>
+              <span class="stat-label">Active Users</span>
+            </div>
+            <div class="stat">
+              <span class="stat-number" id="issuesResolved">892</span>
+              <span class="stat-label">Issues Resolved</span>
+            </div>
+            <div class="stat">
+              <span class="stat-number" id="waterSaved">15.2K</span>
+              <span class="stat-label">Liters Saved</span>
+            </div>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="floating-cards">
+            <div class="floating-card card-1">
+              <div class="card-icon">💧</div>
+              <span>Water Quality</span>
+            </div>
+            <div class="floating-card card-2">
+              <div class="card-icon">🚨</div>
+              <span>Emergency</span>
+            </div>
+            <div class="floating-card card-3">
+              <div class="card-icon">📊</div>
+              <span>Analytics</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quick Actions Grid -->
+      <section class="quick-actions">
+        <h2>Quick Access</h2>
+        <div class="grid-3">
+          <a class="tile" href="citizen.html">
+            <div class="tile-icon">📝</div>
+            <h3>Report Issue</h3>
+            <p>Submit water problems or emergencies</p>
+          </a>
+          <a class="tile" href="map.html">
+            <div class="tile-icon">🗺️</div>
+            <h3>Live Water Map</h3>
+            <p>Real-time campus water status</p>
+          </a>
+          <a class="tile" href="chat.html">
+            <div class="tile-icon">🤖</div>
+            <h3>AI Assistant</h3>
+            <p>Get instant help & guidance</p>
+          </a>
+          <a class="tile" href="education.html">
+            <div class="tile-icon">📚</div>
+            <h3>Water Safety</h3>
+            <p>Educational resources</p>
+          </a>
+          <a class="tile" href="ivr-sms.html">
+            <div class="tile-icon">📞</div>
+            <h3>SMS/IVR Access</h3>
+            <p>No smartphone needed</p>
+          </a>
+        </div>
+      </section>
+
+      <!-- Real-time Alerts -->
+      <section class="alerts-section">
+        <h2>Live Campus Alerts</h2>
+        <div id="liveAlerts" class="alerts-stream">
+          <div class="alert-item new">
+            <span class="alert-badge">NEW</span>
+            <span class="alert-text">Low water pressure reported in Block A</span>
+            <span class="alert-time">2 min ago</span>
+          </div>
+          <div class="alert-item">
+            <span class="alert-badge warning">WARNING</span>
+            <span class="alert-text">Scheduled maintenance at Main Tank</span>
+            <span class="alert-time">15 min ago</span>
+          </div>
+          <div class="alert-item">
+            <span class="alert-badge info">INFO</span>
+            <span class="alert-text">Water quality test completed - All clear</span>
+            <span class="alert-time">1 hour ago</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Integration Section -->
+      <section class="integration">
+        <h2>Integrated with EduServe</h2>
+        <p>Seamlessly connected with your campus portal for enhanced student experience</p>
+        <div class="integration-features">
+          <div class="feature">
+            <span class="feature-icon">🎓</span>
+            <span>Single Sign-On</span>
+          </div>
+          <div class="feature">
+            <span class="feature-icon">📱</span>
+            <span>Mobile App</span>
+          </div>
+          <div class="feature">
+            <span class="feature-icon">🔔</span>
+            <span>Push Notifications</span>
+          </div>
+          <div class="feature">
+            <span class="feature-icon">📊</span>
+            <span>Analytics Dashboard</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h4>AquaX Platform</h4>
+          <p>Smart water management & disaster response system</p>
+        </div>
+        <div class="footer-section">
+          <h4>Access Methods</h4>
+          <div class="access-methods">
+            <span>Web Portal</span>
+            <span>Mobile App</span>
+            <span>SMS Service</span>
+            <span>IVR System</span>
+            <span>Toll-Free: 1800-XXX-XXXX</span>
+          </div>
+        </div>
+        <div class="footer-section">
+          <h4>Powered By</h4>
+          <div class="powered-by">
+            <span class="tech-logo">Google Cloud</span>
+            <span class="tech-logo">GeeksforGeeks</span>
+            <span class="tech-logo">Karunya University</span>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2024 AquaX - Zeroday Crew. All rights reserved.</p>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Voice Control Interface -->
+  <div id="voiceInterface" class="voice-interface hidden">
+    <div class="voice-modal">
+      <div class="voice-header">
+        <h3>Voice Assistant</h3>
+        <button id="closeVoice" class="btn icon">✕</button>
+      </div>
+      <div class="voice-status">
+        <div class="pulse-ring"></div>
+        <div class="voice-icon">🎤</div>
+      </div>
+      <p class="voice-instruction">Speak now... I'm listening</p>
+      <div class="voice-commands">
+        <p>Try saying:</p>
+        <ul>
+          <li>"Report water issue"</li>
+          <li>"Check laundry status"</li>
+          <li>"Emergency help"</li>
+          <li>"Water safety tips"</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize main page functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      // Language switcher
+      const langSwitcher = document.getElementById('langSwitcher');
+      if (langSwitcher) {
+        langSwitcher.value = localStorage.getItem('ax_lang') || 'en';
+        langSwitcher.addEventListener('change', (e) => {
+          localStorage.setItem('ax_lang', e.target.value);
+          location.reload();
+        });
+      }
+
+      // Accessibility panel
+      const accessibilityToggle = document.getElementById('accessibilityToggle');
+      const accessibilityPanel = document.getElementById('accessibilityPanel');
+      const closeAccessibility = document.getElementById('closeAccessibility');
+
+      accessibilityToggle?.addEventListener('click', () => {
+        accessibilityPanel.classList.toggle('hidden');
+      });
+
+      closeAccessibility?.addEventListener('click', () => {
+        accessibilityPanel.classList.add('hidden');
+      });
+
+      // Voice control
+      const voiceControl = document.getElementById('voiceControl');
+      const voiceInterface = document.getElementById('voiceInterface');
+      const closeVoice = document.getElementById('closeVoice');
+
+      voiceControl?.addEventListener('click', () => {
+        voiceInterface.classList.remove('hidden');
+        // Start voice recognition
+        if (window.startListening) {
+          window.startListening((text) => {
+            processVoiceCommand(text);
+            voiceInterface.classList.add('hidden');
+          });
+        }
+      });
+
+      closeVoice?.addEventListener('click', () => {
+        voiceInterface.classList.add('hidden');
+      });
+
+      function processVoiceCommand(text) {
+        const command = text.toLowerCase();
+        if (command.includes('report') || command.includes('issue')) {
+          window.location.href = 'citizen.html';
+        } else if (command.includes('map') || command.includes('location')) {
+          window.location.href = 'map.html';
+        } else if (command.includes('help') || command.includes('assistant')) {
+          window.location.href = 'chat.html';
+        } else if (command.includes('emergency') || command.includes('sos')) {
+          window.location.href = 'citizen.html#sos';
+        } else if (command.includes('laundry')) {
+          window.location.href = 'laundry.html';
+        } else {
+          alert(`Voice command: "${text}" - How can I help you?`);
+        }
+      }
+
+      // Socket.io for real-time updates
+      const socket = io();
+      socket.on('new-alert', (alert) => {
+        updateLiveAlerts(alert);
+      });
+
+      function updateLiveAlerts(alert) {
+        const alertsContainer = document.getElementById('liveAlerts');
+        if (alertsContainer) {
+          const alertElement = document.createElement('div');
+          alertElement.className = 'alert-item new';
+          alertElement.innerHTML = `
+            <span class="alert-badge">NEW</span>
+            <span class="alert-text">${alert.message}</span>
+            <span class="alert-time">just now</span>
+          `;
+          alertsContainer.insertBefore(alertElement, alertsContainer.firstChild);
+          
+          // Keep only 5 alerts visible
+          if (alertsContainer.children.length > 5) {
+            alertsContainer.removeChild(alertsContainer.lastChild);
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

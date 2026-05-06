@@ -1,0 +1,1108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>AquaX — Authority Dashboard</title>
+  <link rel="stylesheet" href="styles/base.css"/>
+  <link rel="stylesheet" href="styles/authority.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script defer src="scripts/authority.js"></script>
+  <script defer src="scripts/lang.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">💧</div>
+      <span>AquaX — Authority Dashboard</span>
+    </div>
+    <nav class="nav">
+      <a href="index.html" class="nav-link">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-text">Home</span>
+      </a>
+      <a href="map.html" class="nav-link">
+        <span class="nav-icon">🗺️</span>
+        <span class="nav-text">Live Map</span>
+      </a>
+      <a href="engineers.html" class="nav-link">
+        <span class="nav-icon">🔧</span>
+        <span class="nav-text">Engineers</span>
+      </a>
+      <a href="ngos.html" class="nav-link">
+        <span class="nav-icon">🤝</span>
+        <span class="nav-text">NGOs</span>
+      </a>
+    </nav>
+    <div class="controls">
+      <button class="btn icon" onclick="toggleFullscreen()" title="Fullscreen">⛶</button>
+      <button class="btn icon" onclick="refreshAllData()" title="Refresh">🔄</button>
+      <select id="langSwitcher" class="lang-selector">
+        <option value="en">English</option>
+        <option value="hi">हिन्दी</option>
+        <option value="ta">தமிழ்</option>
+      </select>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+      <div class="header-content">
+        <h1>Water Management Dashboard</h1>
+        <p>Real-time monitoring and control of campus water systems</p>
+      </div>
+      <div class="header-stats">
+        <div class="stat-card mini">
+          <div class="stat-icon">🚨</div>
+          <div class="stat-info">
+            <div class="stat-value" id="criticalAlerts">3</div>
+            <div class="stat-label">Critical Alerts</div>
+          </div>
+        </div>
+        <div class="stat-card mini">
+          <div class="stat-icon">⏱️</div>
+          <div class="stat-info">
+            <div class="stat-value" id="avgResponse">2.5h</div>
+            <div class="stat-label">Avg Response</div>
+          </div>
+        </div>
+        <div class="stat-card mini">
+          <div class="stat-icon">💧</div>
+          <div class="stat-info">
+            <div class="stat-value" id="waterSaved">15.2K</div>
+            <div class="stat-label">Liters Saved</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Dashboard Grid -->
+    <div class="dashboard-grid">
+      <!-- Left Column -->
+      <div class="column">
+        <!-- Emergency Alerts -->
+        <section class="card emergency-alerts">
+          <div class="card-header">
+            <h2>🚨 Emergency Alerts</h2>
+            <div class="card-actions">
+              <button class="btn icon small" onclick="acknowledgeAllAlerts()" title="Acknowledge All">✅</button>
+              <button class="btn icon small" onclick="refreshAlerts()" title="Refresh">🔄</button>
+            </div>
+          </div>
+          <div class="alerts-list" id="emergencyAlerts">
+            <div class="alert-item critical">
+              <div class="alert-header">
+                <span class="alert-badge">CRITICAL</span>
+                <span class="alert-time">5 min ago</span>
+              </div>
+              <div class="alert-content">
+                <h4>Major Water Contamination</h4>
+                <p>Brown water reported in Girls Hostel Block B</p>
+                <div class="alert-meta">
+                  <span class="location">📍 Hostel Zone</span>
+                  <span class="reporter">👤 Reported by: Student #2341</span>
+                </div>
+              </div>
+              <div class="alert-actions">
+                <button class="btn small danger" onclick="dispatchTeam(this)">🚑 Dispatch Team</button>
+                <button class="btn small" onclick="acknowledgeAlert(this)">✅ Ack</button>
+                <button class="btn small outline" onclick="viewDetails(this)">📋 Details</button>
+              </div>
+            </div>
+
+            <div class="alert-item high">
+              <div class="alert-header">
+                <span class="alert-badge">HIGH</span>
+                <span class="alert-time">12 min ago</span>
+              </div>
+              <div class="alert-content">
+                <h4>Pipe Burst - Flooding</h4>
+                <p>Major pipe burst near Academic Block A</p>
+                <div class="alert-meta">
+                  <span class="location">📍 Academic Zone</span>
+                  <span class="reporter">👤 Reported by: Faculty #567</span>
+                </div>
+              </div>
+              <div class="alert-actions">
+                <button class="btn small danger" onclick="dispatchTeam(this)">🚑 Dispatch Team</button>
+                <button class="btn small" onclick="acknowledgeAlert(this)">✅ Ack</button>
+                <button class="btn small outline" onclick="viewDetails(this)">📋 Details</button>
+              </div>
+            </div>
+
+            <div class="alert-item medium">
+              <div class="alert-header">
+                <span class="alert-badge">MEDIUM</span>
+                <span class="alert-time">25 min ago</span>
+              </div>
+              <div class="alert-content">
+                <h4>Low Water Pressure</h4>
+                <p>Multiple reports of low pressure in Boys Hostel</p>
+                <div class="alert-meta">
+                  <span class="location">📍 Hostel Zone</span>
+                  <span class="reporter">👤 5+ Reports</span>
+                </div>
+              </div>
+              <div class="alert-actions">
+                <button class="btn small warning" onclick="scheduleMaintenance(this)">🔧 Schedule</button>
+                <button class="btn small" onclick="acknowledgeAlert(this)">✅ Ack</button>
+                <button class="btn small outline" onclick="viewDetails(this)">📋 Details</button>
+              </div>
+            </div>
+          </div>
+          <div class="card-footer">
+            <button class="btn outline" onclick="viewAllAlerts()">View All Alerts (12)</button>
+          </div>
+        </section>
+
+        <!-- Quick Actions -->
+        <section class="card quick-actions">
+          <h2>⚡ Quick Actions</h2>
+          <div class="actions-grid">
+            <button class="action-btn primary" onclick="sendCampusAlert()">
+              <span class="action-icon">📢</span>
+              <span class="action-text">Campus Alert</span>
+            </button>
+            <button class="action-btn" onclick="scheduleMaintenance()">
+              <span class="action-icon">🔧</span>
+              <span class="action-text">Maintenance</span>
+            </button>
+            <button class="action-btn" onclick="generateReport()">
+              <span class="action-icon">📊</span>
+              <span class="action-text">Generate Report</span>
+            </button>
+            <button class="action-btn" onclick="manageResources()">
+              <span class="action-icon">🚚</span>
+              <span class="action-text">Tanker Management</span>
+            </button>
+            <button class="action-btn" onclick="waterQualityTest()">
+              <span class="action-icon">🔬</span>
+              <span class="action-text">Quality Test</span>
+            </button>
+            <button class="action-btn" onclick="emergencyProtocol()">
+              <span class="action-icon">🆘</span>
+              <span class="action-text">Emergency Protocol</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Engineer Teams -->
+        <section class="card teams-card">
+          <div class="card-header">
+            <h2>🔧 Engineer Teams</h2>
+            <button class="btn small" onclick="assignNewTask()">➕ Assign Task</button>
+          </div>
+          <div class="teams-list">
+            <div class="team-item">
+              <div class="team-header">
+                <span class="team-name">Emergency Response Team</span>
+                <span class="team-status available">Available</span>
+              </div>
+              <div class="team-members">
+                <span class="member">👤 Raj Kumar (Lead)</span>
+                <span class="member">👤 Priya Singh</span>
+                <span class="member">👤 Arjun Patel</span>
+              </div>
+              <div class="team-stats">
+                <span class="stat">🛠️ 3 Active Tasks</span>
+                <span class="stat">✅ 12 Completed Today</span>
+              </div>
+            </div>
+
+            <div class="team-item">
+              <div class="team-header">
+                <span class="team-name">Maintenance Crew A</span>
+                <span class="team-status busy">On Site</span>
+              </div>
+              <div class="team-members">
+                <span class="member">👤 Suresh Kumar</span>
+                <span class="member">👤 Meena Sharma</span>
+              </div>
+              <div class="team-stats">
+                <span class="stat">📍 Academic Block B</span>
+                <span class="stat">⏱️ 45m on site</span>
+              </div>
+            </div>
+
+            <div class="team-item">
+              <div class="team-header">
+                <span class="team-name">Quality Control Team</span>
+                <span class="team-status available">Available</span>
+              </div>
+              <div class="team-members">
+                <span class="member">👤 Dr. Anjali Mehta</span>
+                <span class="member">👤 Vikram Joshi</span>
+              </div>
+              <div class="team-stats">
+                <span class="stat">🔬 8 Tests Today</span>
+                <span class="stat">✅ All Parameters Normal</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Right Column -->
+      <div class="column">
+        <!-- Statistics Overview -->
+        <section class="card stats-overview">
+          <div class="card-header">
+            <h2>📊 Statistics Overview</h2>
+            <div class="time-filter">
+              <select onchange="updateStatsPeriod(this.value)">
+                <option value="today">Today</option>
+                <option value="week" selected>This Week</option>
+                <option value="month">This Month</option>
+                <option value="year">This Year</option>
+              </select>
+            </div>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon">📝</div>
+              <div class="stat-info">
+                <div class="stat-value" id="totalReports">47</div>
+                <div class="stat-label">Total Reports</div>
+                <div class="stat-trend up">+12% from last week</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">✅</div>
+              <div class="stat-info">
+                <div class="stat-value" id="resolvedIssues">42</div>
+                <div class="stat-label">Resolved Issues</div>
+                <div class="stat-trend up">+8% efficiency</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">⏱️</div>
+              <div class="stat-info">
+                <div class="stat-value" id="avgResolution">2.3h</div>
+                <div class="stat-label">Avg Resolution Time</div>
+                <div class="stat-trend down">-15% faster</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">💧</div>
+              <div class="stat-info">
+                <div class="stat-value" id="waterUsage">18.5K</div>
+                <div class="stat-label">Liters Used Today</div>
+                <div class="stat-trend down">-5% conservation</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Live Analytics -->
+        <section class="card analytics-card">
+          <div class="card-header">
+            <h2>📈 Live Analytics</h2>
+            <div class="chart-controls">
+              <button class="btn icon small" onclick="exportChart()" title="Export">📤</button>
+              <button class="btn icon small" onclick="toggleChartView()" title="Toggle View">🔍</button>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="issuesChart"></canvas>
+          </div>
+          <div class="chart-legend">
+            <div class="legend-item">
+              <span class="legend-color leak"></span>
+              <span>Water Leaks</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color contamination"></span>
+              <span>Contamination</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color pressure"></span>
+              <span>Pressure Issues</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color other"></span>
+              <span>Other Issues</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Water Infrastructure Status -->
+        <section class="card infrastructure-card">
+          <div class="card-header">
+            <h2>🏗️ Infrastructure Status</h2>
+            <button class="btn small" onclick="refreshInfrastructure()">🔄 Refresh</button>
+          </div>
+          <div class="infrastructure-grid">
+            <div class="infra-item operational">
+              <div class="infra-icon">💧</div>
+              <div class="infra-info">
+                <div class="infra-name">Main Water Tank</div>
+                <div class="infra-status">Operational</div>
+                <div class="infra-details">Capacity: 85% • Pressure: Normal</div>
+              </div>
+            </div>
+            <div class="infra-item maintenance">
+              <div class="infra-icon">🏭</div>
+              <div class="infra-info">
+                <div class="infra-name">Treatment Plant</div>
+                <div class="infra-status">Maintenance</div>
+                <div class="infra-details">Scheduled • ETA: 2 hours</div>
+              </div>
+            </div>
+            <div class="infra-item operational">
+              <div class="infra-icon">🚰</div>
+              <div class="infra-info">
+                <div class="infra-name">Hostel Supply</div>
+                <div class="infra-status">Operational</div>
+                <div class="infra-details">Pressure: Normal • Quality: Good</div>
+              </div>
+            </div>
+            <div class="infra-item warning">
+              <div class="infra-icon">🔧</div>
+              <div class="infra-info">
+                <div class="infra-name">Pump Station A</div>
+                <div class="infra-status">Low Pressure</div>
+                <div class="infra-details">Needs inspection • Alert sent</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Recent Activity -->
+        <section class="card activity-card">
+          <div class="card-header">
+            <h2>📋 Recent Activity</h2>
+            <button class="btn small outline" onclick="viewActivityLog()">View All</button>
+          </div>
+          <div class="activity-list">
+            <div class="activity-item">
+              <div class="activity-icon">🔧</div>
+              <div class="activity-content">
+                <div class="activity-title">Maintenance completed</div>
+                <div class="activity-desc">Pipe repair in Academic Block</div>
+                <div class="activity-meta">Team A • 15 minutes ago</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon">✅</div>
+              <div class="activity-content">
+                <div class="activity-title">Issue resolved</div>
+                <div class="activity-desc">Low pressure in Girls Hostel</div>
+                <div class="activity-meta">Auto-resolved • 25 minutes ago</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon">📝</div>
+              <div class="activity-content">
+                <div class="activity-title">New report filed</div>
+                <div class="activity-desc">Water leakage near cafeteria</div>
+                <div class="activity-meta">Student #8921 • 30 minutes ago</div>
+              </div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-icon">🔬</div>
+              <div class="activity-content">
+                <div class="activity-title">Quality test completed</div>
+                <div class="activity-desc">All parameters within limits</div>
+                <div class="activity-meta">Lab Team • 1 hour ago</div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- Full Width Sections -->
+    <div class="full-width-sections">
+      <!-- Live Map -->
+      <section class="card map-card">
+        <div class="card-header">
+          <h2>🗺️ Live Issue Map</h2>
+          <div class="map-controls">
+            <button class="btn small" onclick="refreshMap()">🔄 Refresh</button>
+            <button class="btn small" onclick="toggleHeatmap()">🔥 Heatmap</button>
+            <button class="btn small" onclick="exportMapData()">📤 Export</button>
+          </div>
+        </div>
+        <div id="authorityMap" class="authority-map"></div>
+        <div class="map-legend">
+          <div class="legend-item">
+            <span class="legend-dot critical"></span>
+            <span>Critical (0-1h)</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot high"></span>
+            <span>High (1-4h)</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot medium"></span>
+            <span>Medium (4-12h)</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot low"></span>
+            <span>Low (12h+)</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Resource Management -->
+      <section class="card resources-card">
+        <div class="card-header">
+          <h2>🚚 Resource Management</h2>
+          <button class="btn primary" onclick="allocateResources()">Allocate Resources</button>
+        </div>
+        <div class="resources-grid">
+          <div class="resource-item">
+            <div class="resource-header">
+              <span class="resource-name">Water Tankers</span>
+              <span class="resource-status available">3 Available</span>
+            </div>
+            <div class="resource-details">
+              <div class="resource-metric">
+                <span class="metric-value">2</span>
+                <span class="metric-label">Deployed</span>
+              </div>
+              <div class="resource-metric">
+                <span class="metric-value">5</span>
+                <span class="metric-label">Total</span>
+              </div>
+              <div class="resource-metric">
+                <span class="metric-value">85%</span>
+                <span class="metric-label">Utilization</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="resource-item">
+            <div class="resource-header">
+              <span class="resource-name">Maintenance Kits</span>
+              <span class="resource-status low">2 Remaining</span>
+            </div>
+            <div class="resource-details">
+              <div class="resource-metric">
+                <span class="metric-value">8</span>
+                <span class="metric-label">Used Today</span>
+              </div>
+              <div class="resource-metric">
+                <span class="metric-value">10</span>
+                <span class="metric-label">Total</span>
+              </div>
+              <div class="resource-metric">
+                <span class="metric-value">80%</span>
+                <span class="metric-label">Usage</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="resource-item">
+            <div class="resource-header">
+              <span class="resource-name">Water Testing Kits</span>
+              <span class="resource-status available">15 Available</span>
+            </div>
+            <div class="resource-details">
+              <div class="resource-metric">
+                <span class="metric-value">5</span>
+                <span class="metric-label">Used Today</span>
+              </div>
+              <div class="resource-metric">
+                <span class="metric-value">20</span>
+                <span class="metric-label">Total</span>
+              </div>
+              <div class="resource-metric">
+                <span class="metric-value">25%</span>
+                <span class="metric-label">Usage</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="resource-item">
+            <div class="resource-header">
+              <span class="resource-name">Emergency Supplies</span>
+              <span class="resource-status full">Fully Stocked</span>
+            </div>
+            <div class="resource-details">
+              <div class="resource-metric">
+                <span class="metric-value">0</span>
+                <span class="metric-label">Used Today</span>
+              </div>
+              <div class="resource-metric">
+                <span class="metric-value">50</span>
+                <span class="metric-label">Total</span>
+              </div>
+              <div class="resource-metric">
+                <span class="metric-value">100%</span>
+                <span class="metric-label">Stock</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Modals -->
+  <!-- Alert Details Modal -->
+  <div id="alertDetailsModal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>🚨 Alert Details</h3>
+        <button class="btn icon" onclick="closeModal('alertDetailsModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="alert-details">
+          <div class="detail-section">
+            <h4>Issue Information</h4>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <label>Type:</label>
+                <span>Water Contamination</span>
+              </div>
+              <div class="detail-item">
+                <label>Severity:</label>
+                <span class="severity-badge critical">CRITICAL</span>
+              </div>
+              <div class="detail-item">
+                <label>Location:</label>
+                <span>Girls Hostel Block B, Room 205</span>
+              </div>
+              <div class="detail-item">
+                <label>Reported:</label>
+                <span>5 minutes ago</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <h4>Description</h4>
+            <p>Brown, muddy water coming from all taps in the hostel block. Strong chemical smell noticed by multiple residents.</p>
+          </div>
+
+          <div class="detail-section">
+            <h4>Actions Taken</h4>
+            <div class="actions-timeline">
+              <div class="timeline-item">
+                <span class="timeline-time">5m ago</span>
+                <span class="timeline-action">Alert received</span>
+              </div>
+              <div class="timeline-item">
+                <span class="timeline-time">3m ago</span>
+                <span class="timeline-action">Emergency team notified</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <h4>Recommended Actions</h4>
+            <div class="recommendations">
+              <div class="recommendation">🚑 Dispatch emergency water quality team</div>
+              <div class="recommendation">📢 Issue campus-wide water advisory</div>
+              <div class="recommendation">🚰 Deploy emergency water supply</div>
+              <div class="recommendation">🔬 Immediate water testing required</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn outline" onclick="closeModal('alertDetailsModal')">Close</button>
+        <button class="btn danger" onclick="dispatchEmergencyTeam()">🚑 Dispatch Emergency Team</button>
+        <button class="btn primary" onclick="sendCampusAlert()">📢 Send Campus Alert</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Send Alert Modal -->
+  <div id="sendAlertModal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>📢 Send Campus Alert</h3>
+        <button class="btn icon" onclick="closeModal('sendAlertModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="alertForm">
+          <div class="form-group">
+            <label>Alert Type</label>
+            <select id="alertType" required>
+              <option value="">Select alert type</option>
+              <option value="water_outage">Water Outage</option>
+              <option value="quality_issue">Water Quality Issue</option>
+              <option value="maintenance">Scheduled Maintenance</option>
+              <option value="emergency">Emergency Situation</option>
+              <option value="advisory">General Advisory</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Affected Areas</label>
+            <div class="areas-grid">
+              <label class="area-checkbox">
+                <input type="checkbox" name="areas" value="boys_hostel">
+                <span>Boys Hostel</span>
+              </label>
+              <label class="area-checkbox">
+                <input type="checkbox" name="areas" value="girls_hostel">
+                <span>Girls Hostel</span>
+              </label>
+              <label class="area-checkbox">
+                <input type="checkbox" name="areas" value="academic">
+                <span>Academic Blocks</span>
+              </label>
+              <label class="area-checkbox">
+                <input type="checkbox" name="areas" value="admin">
+                <span>Administrative</span>
+              </label>
+              <label class="area-checkbox">
+                <input type="checkbox" name="areas" value="faculty">
+                <span>Faculty Quarters</span>
+              </label>
+              <label class="area-checkbox">
+                <input type="checkbox" name="areas" value="campus_wide" checked>
+                <span>Campus Wide</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Alert Message</label>
+            <textarea id="alertMessage" placeholder="Enter alert message for students and staff..." rows="4" required></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Severity Level</label>
+            <div class="severity-options">
+              <label class="severity-option">
+                <input type="radio" name="severity" value="low">
+                <span class="severity-dot low"></span>
+                <span>Low - Informational</span>
+              </label>
+              <label class="severity-option">
+                <input type="radio" name="severity" value="medium" checked>
+                <span class="severity-dot medium"></span>
+                <span>Medium - Advisory</span>
+              </label>
+              <label class="severity-option">
+                <input type="radio" name="severity" value="high">
+                <span class="severity-dot high"></span>
+                <span>High - Warning</span>
+              </label>
+              <label class="severity-option">
+                <input type="radio" name="severity" value="critical">
+                <span class="severity-dot critical"></span>
+                <span>Critical - Emergency</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Delivery Methods</label>
+            <div class="delivery-methods">
+              <label class="method-checkbox">
+                <input type="checkbox" name="methods" value="push" checked>
+                <span>Push Notification</span>
+              </label>
+              <label class="method-checkbox">
+                <input type="checkbox" name="methods" value="sms">
+                <span>SMS</span>
+              </label>
+              <label class="method-checkbox">
+                <input type="checkbox" name="methods" value="email">
+                <span>Email</span>
+              </label>
+              <label class="method-checkbox">
+                <input type="checkbox" name="methods" value="ivr">
+                <span>IVR Call</span>
+              </label>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn outline" onclick="closeModal('sendAlertModal')">Cancel</button>
+        <button class="btn primary" onclick="sendCampusAlertNow()">📢 Send Alert</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <span>AquaX Authority Dashboard • Real-time Water Management System</span>
+      <span>Last Updated: <span id="lastSystemUpdate">Just now</span></span>
+    </div>
+  </footer>
+
+  <script>
+    // Initialize authority dashboard
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('Authority dashboard initialized');
+      
+      // Initialize language switcher
+      const langSwitcher = document.getElementById('langSwitcher');
+      if (langSwitcher) {
+        langSwitcher.value = localStorage.getItem('ax_lang') || 'en';
+        langSwitcher.addEventListener('change', (e) => {
+          localStorage.setItem('ax_lang', e.target.value);
+          showNotification(`Language changed to ${e.target.value}`);
+        });
+      }
+
+      // Initialize charts
+      initializeCharts();
+      
+      // Initialize map
+      initializeAuthorityMap();
+      
+      // Start live updates
+      startLiveUpdates();
+      
+      // Update last system update time
+      updateSystemTime();
+    });
+
+    // Chart initialization
+    function initializeCharts() {
+      const ctx = document.getElementById('issuesChart').getContext('2d');
+      const issuesChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['6AM', '8AM', '10AM', '12PM', '2PM', '4PM', '6PM'],
+          datasets: [
+            {
+              label: 'Water Leaks',
+              data: [2, 5, 8, 12, 15, 18, 20],
+              borderColor: '#3498db',
+              backgroundColor: 'rgba(52, 152, 219, 0.1)',
+              tension: 0.4,
+              fill: true
+            },
+            {
+              label: 'Contamination',
+              data: [0, 1, 3, 2, 4, 3, 2],
+              borderColor: '#e74c3c',
+              backgroundColor: 'rgba(231, 76, 60, 0.1)',
+              tension: 0.4,
+              fill: true
+            },
+            {
+              label: 'Pressure Issues',
+              data: [1, 3, 6, 8, 10, 12, 14],
+              borderColor: '#f39c12',
+              backgroundColor: 'rgba(243, 156, 18, 0.1)',
+              tension: 0.4,
+              fill: true
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Number of Issues'
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Time of Day'
+              }
+            }
+          },
+          interaction: {
+            mode: 'nearest',
+            axis: 'x',
+            intersect: false
+          }
+        }
+      });
+    }
+
+    // Map initialization
+    function initializeAuthorityMap() {
+      const map = L.map('authorityMap').setView([10.9315, 76.9793], 16);
+      
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
+
+      // Add sample issue markers
+      const issues = [
+        { coords: [10.9310, 76.9790], type: 'critical', title: 'Contamination' },
+        { coords: [10.9315, 76.9788], type: 'high', title: 'Pipe Burst' },
+        { coords: [10.9320, 76.9795], type: 'medium', title: 'Low Pressure' },
+        { coords: [10.9308, 76.9792], type: 'low', title: 'Minor Leak' }
+      ];
+
+      issues.forEach(issue => {
+        const color = getSeverityColor(issue.type);
+        const marker = L.circleMarker(issue.coords, {
+          color: color,
+          fillColor: color,
+          fillOpacity: 0.7,
+          radius: 8
+        }).addTo(map);
+        
+        marker.bindPopup(`
+          <div style="text-align: center;">
+            <h4>${issue.title}</h4>
+            <p>Severity: ${issue.type.toUpperCase()}</p>
+            <button onclick="viewAlertDetails('${issue.type}')" style="background: ${color}; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
+              View Details
+            </button>
+          </div>
+        `);
+      });
+    }
+
+    function getSeverityColor(severity) {
+      const colors = {
+        critical: '#e74c3c',
+        high: '#e67e22',
+        medium: '#f39c12',
+        low: '#2ecc71'
+      };
+      return colors[severity] || '#95a5a6';
+    }
+
+    // Live updates
+    function startLiveUpdates() {
+      // Update stats every 30 seconds
+      setInterval(updateLiveStats, 30000);
+      
+      // Simulate real-time alerts
+      setInterval(simulateNewAlert, 120000);
+    }
+
+    function updateLiveStats() {
+      // Simulate live data updates
+      const stats = ['totalReports', 'resolvedIssues', 'criticalAlerts'];
+      stats.forEach(stat => {
+        const element = document.getElementById(stat);
+        if (element) {
+          const current = parseInt(element.textContent);
+          const change = Math.floor(Math.random() * 3) - 1; // -1, 0, or 1
+          element.textContent = Math.max(0, current + change);
+        }
+      });
+      
+      updateSystemTime();
+    }
+
+    function simulateNewAlert() {
+      const alerts = [
+        { type: 'medium', title: 'Low Pressure', location: 'Academic Block C' },
+        { type: 'low', title: 'Minor Leak', location: 'Faculty Quarters' },
+        { type: 'high', title: 'Water Discoloration', location: 'Hostel Zone' }
+      ];
+      
+      const alert = alerts[Math.floor(Math.random() * alerts.length)];
+      showNotification(`New ${alert.type} alert: ${alert.title} in ${alert.location}`);
+    }
+
+    function updateSystemTime() {
+      document.getElementById('lastSystemUpdate').textContent = new Date().toLocaleTimeString();
+    }
+
+    // Alert management
+    function acknowledgeAlert(button) {
+      const alertItem = button.closest('.alert-item');
+      alertItem.style.opacity = '0.6';
+      button.textContent = '✅ Acknowledged';
+      button.disabled = true;
+      showNotification('Alert acknowledged');
+    }
+
+    function acknowledgeAllAlerts() {
+      document.querySelectorAll('.alert-item').forEach(alert => {
+        alert.style.opacity = '0.6';
+      });
+      showNotification('All alerts acknowledged');
+    }
+
+    function dispatchTeam(button) {
+      const alertItem = button.closest('.alert-item');
+      const alertType = alertItem.querySelector('h4').textContent;
+      button.textContent = '🚑 Dispatched';
+      button.disabled = true;
+      showNotification(`Emergency team dispatched for: ${alertType}`);
+    }
+
+    function viewDetails(button) {
+      // In a real app, this would fetch specific alert details
+      showModal('alertDetailsModal');
+    }
+
+    function scheduleMaintenance(button) {
+      showNotification('Maintenance scheduling interface opened');
+    }
+
+    // Modal management
+    function showModal(modalId) {
+      document.getElementById(modalId).classList.remove('hidden');
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.add('hidden');
+    }
+
+    // Quick actions
+    function sendCampusAlert() {
+      showModal('sendAlertModal');
+    }
+
+    function sendCampusAlertNow() {
+      const message = document.getElementById('alertMessage').value;
+      const severity = document.querySelector('input[name="severity"]:checked').value;
+      showNotification(`Campus alert sent (${severity} severity)`);
+      closeModal('sendAlertModal');
+    }
+
+    function generateReport() {
+      showNotification('Generating comprehensive water management report...');
+      setTimeout(() => {
+        showNotification('Report generated and sent to your email');
+      }, 2000);
+    }
+
+    function manageResources() {
+      showNotification('Opening resource management panel...');
+    }
+
+    function waterQualityTest() {
+      showNotification('Initiating campus-wide water quality test...');
+    }
+
+    function emergencyProtocol() {
+      showNotification('Emergency protocol activated. All teams notified.');
+    }
+
+    function assignNewTask() {
+      showNotification('Opening task assignment interface...');
+    }
+
+    // Utility functions
+    function refreshAllData() {
+      showNotification('Refreshing all dashboard data...');
+      updateLiveStats();
+    }
+
+    function refreshAlerts() {
+      showNotification('Alerts refreshed');
+    }
+
+    function refreshMap() {
+      showNotification('Map data refreshed');
+    }
+
+    function refreshInfrastructure() {
+      showNotification('Infrastructure status updated');
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    function toggleHeatmap() {
+      showNotification('Heatmap view toggled');
+    }
+
+    function exportMapData() {
+      showNotification('Map data exported successfully');
+    }
+
+    function exportChart() {
+      showNotification('Chart data exported');
+    }
+
+    function toggleChartView() {
+      showNotification('Chart view changed');
+    }
+
+    function updateStatsPeriod(period) {
+      showNotification(`Statistics updated for ${period}`);
+    }
+
+    function viewAllAlerts() {
+      showNotification('Opening complete alerts list...');
+    }
+
+    function viewActivityLog() {
+      showNotification('Opening activity log...');
+    }
+
+    function allocateResources() {
+      showNotification('Opening resource allocation panel...');
+    }
+
+    function dispatchEmergencyTeam() {
+      showNotification('🚑 EMERGENCY TEAM DISPATCHED - All units notified');
+      closeModal('alertDetailsModal');
+    }
+
+    function showNotification(message) {
+      // Create notification element
+      const notification = document.createElement('div');
+      notification.className = 'authority-notification';
+      notification.textContent = message;
+      notification.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 10px;
+        padding: 12px 18px;
+        color: var(--text-light);
+        z-index: 10000;
+        box-shadow: var(--glass-shadow);
+        animation: slideInRight 0.3s ease;
+        max-width: 300px;
+      `;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.style.animation = 'slideOutRight 0.3s ease';
+          setTimeout(() => notification.remove(), 300);
+        }
+      }, 3000);
+    }
+
+    // Add CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideInRight {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+      @keyframes slideOutRight {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+      }
+      .alert-item {
+        transition: all 0.3s ease;
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>

@@ -1,0 +1,872 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>AquaX — Leaderboard</title>
+  <link rel="stylesheet" href="styles/base.css"/>
+  <link rel="stylesheet" href="styles/leaderboard.css"/>
+  <script src="/socket.io/socket.io.js"></script>
+  <script defer src="scripts/gamification.js"></script>
+  <script defer src="scripts/lang.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">💧</div>
+      <span>AquaX — Leaderboard</span>
+    </div>
+    <nav class="nav">
+      <a href="index.html" class="nav-link">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-text">Home</span>
+      </a>
+      <a href="citizen.html" class="nav-link">
+        <span class="nav-icon">👥</span>
+        <span class="nav-text">Report</span>
+      </a>
+      <a href="map.html" class="nav-link">
+        <span class="nav-icon">🗺️</span>
+        <span class="nav-text">Map</span>
+      </a>
+      <a href="chat.html" class="nav-link">
+        <span class="nav-icon">🤖</span>
+        <span class="nav-text">Assistant</span>
+      </a>
+    </nav>
+    <div class="controls">
+      <button class="btn icon" onclick="toggleView()" title="Toggle View">🔀</button>
+      <button class="btn icon" onclick="shareLeaderboard()" title="Share">📤</button>
+      <select id="langSwitcher" class="lang-selector">
+        <option value="en">English</option>
+        <option value="hi">हिन्दी</option>
+        <option value="ta">தமிழ்</option>
+        <option value="te">తెలుగు</option>
+        <option value="kn">ಕನ್ನಡ</option>
+        <option value="ml">മലയാളം</option>
+      </select>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Leaderboard Header -->
+    <div class="leaderboard-header">
+      <div class="header-content">
+        <h1>🏆 AquaX Leaderboard</h1>
+        <p>Celebrating water champions and conservation heroes at Karunya University</p>
+      </div>
+      <div class="header-stats">
+        <div class="stat-card mini">
+          <div class="stat-icon">👥</div>
+          <div class="stat-info">
+            <div class="stat-value" id="totalParticipants">1,247</div>
+            <div class="stat-label">Participants</div>
+          </div>
+        </div>
+        <div class="stat-card mini">
+          <div class="stat-icon">💧</div>
+          <div class="stat-info">
+            <div class="stat-value" id="totalPoints">45.8K</div>
+            <div class="stat-label">Total Points</div>
+          </div>
+        </div>
+        <div class="stat-card mini">
+          <div class="stat-icon">🌍</div>
+          <div class="stat-info">
+            <div class="stat-value" id="waterSaved">125K</div>
+            <div class="stat-label">Liters Saved</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- User Profile Card -->
+    <section class="card user-profile-card">
+      <div class="profile-header">
+        <div class="user-avatar">
+          <div class="avatar-icon">👤</div>
+          <div class="level-badge">Lvl 8</div>
+        </div>
+        <div class="user-info">
+          <h2 id="userName">You</h2>
+          <p class="user-title">Water Conservation Champion</p>
+          <div class="user-stats">
+            <span class="stat">🏆 Rank: <strong id="userRank">15</strong></span>
+            <span class="stat">⭐ Points: <strong id="userPoints">2,845</strong></span>
+            <span class="stat">💧 Saved: <strong>3.2K</strong> liters</span>
+          </div>
+        </div>
+        <div class="profile-actions">
+          <button class="btn primary" onclick="viewAchievements()">🏅 My Achievements</button>
+          <button class="btn outline" onclick="viewActivity()">📊 Activity</button>
+        </div>
+      </div>
+      
+      <!-- Progress to Next Level -->
+      <div class="level-progress">
+        <div class="progress-header">
+          <span>Progress to Level 9</span>
+          <span>2,845 / 3,200 points</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 89%"></div>
+        </div>
+        <div class="progress-note">
+          <span>355 points to next level</span>
+          <span>🎯 Target: 3,200 points</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Leaderboard Navigation -->
+    <div class="leaderboard-nav">
+      <div class="nav-tabs">
+        <button class="nav-tab active" data-tab="global">🌍 Global Ranking</button>
+        <button class="nav-tab" data-tab="monthly">📅 This Month</button>
+        <button class="nav-tab" data-tab="hostels">🏢 Hostels</button>
+        <button class="nav-tab" data-tab="departments">🎓 Departments</button>
+        <button class="nav-tab" data-tab="friends">👥 Friends</button>
+      </div>
+      <div class="nav-filters">
+        <select id="timeFilter" onchange="updateLeaderboard()">
+          <option value="alltime">All Time</option>
+          <option value="monthly">This Month</option>
+          <option value="weekly">This Week</option>
+          <option value="today">Today</option>
+        </select>
+        <select id="categoryFilter" onchange="updateLeaderboard()">
+          <option value="all">All Categories</option>
+          <option value="reports">Issue Reports</option>
+          <option value="conservation">Water Conservation</option>
+          <option value="education">Education</option>
+          <option value="community">Community</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Main Leaderboard -->
+    <div class="leaderboard-container">
+      <!-- Top 3 Winners -->
+      <div class="podium-section">
+        <div class="podium-item second">
+          <div class="podium-rank">2</div>
+          <div class="podium-avatar">
+            <div class="avatar-crown">🥈</div>
+            <div class="avatar-icon">👩‍🎓</div>
+          </div>
+          <div class="podium-info">
+            <h3>Priya Sharma</h3>
+            <p class="user-title">Eco Warrior</p>
+            <div class="points">4,820 pts</div>
+          </div>
+          <div class="podium-stats">
+            <span>💧 5.2K liters saved</span>
+            <span>📝 42 reports</span>
+          </div>
+        </div>
+
+        <div class="podium-item first">
+          <div class="podium-rank">1</div>
+          <div class="podium-avatar">
+            <div class="avatar-crown">👑</div>
+            <div class="avatar-icon">👨‍🎓</div>
+          </div>
+          <div class="podium-info">
+            <h3>Arjun Kumar</h3>
+            <p class="user-title">Water Guardian</p>
+            <div class="points">5,420 pts</div>
+          </div>
+          <div class="podium-stats">
+            <span>💧 6.8K liters saved</span>
+            <span>📝 58 reports</span>
+          </div>
+          <div class="podium-badge">🔥 Streak: 14 days</div>
+        </div>
+
+        <div class="podium-item third">
+          <div class="podium-rank">3</div>
+          <div class="podium-avatar">
+            <div class="avatar-crown">🥉</div>
+            <div class="avatar-icon">👨‍💼</div>
+          </div>
+          <div class="podium-info">
+            <h3>Dr. Suresh</h3>
+            <p class="user-title">Faculty Champion</p>
+            <div class="points">4,650 pts</div>
+          </div>
+          <div class="podium-stats">
+            <span>💧 4.1K liters saved</span>
+            <span>📝 35 reports</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Leaderboard List -->
+      <div class="leaderboard-list" id="leaderboardList">
+        <!-- Rank 4-10 will be populated by JavaScript -->
+      </div>
+
+      <!-- Load More Button -->
+      <div class="load-more-section">
+        <button class="btn outline" onclick="loadMoreRankings()">📥 Load More Rankings</button>
+      </div>
+    </div>
+
+    <!-- Achievements Section -->
+    <section class="card achievements-card">
+      <div class="card-header">
+        <h2>🎯 Available Achievements</h2>
+        <span class="achievement-count">12/25 Unlocked</span>
+      </div>
+      <div class="achievements-grid">
+        <div class="achievement-item unlocked">
+          <div class="achievement-icon">💧</div>
+          <div class="achievement-info">
+            <h4>First Report</h4>
+            <p>Submit your first water issue report</p>
+            <div class="achievement-progress">
+              <span>+50 pts</span>
+              <span class="status unlocked">✅ Unlocked</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="achievement-item unlocked">
+          <div class="achievement-icon">🌱</div>
+          <div class="achievement-info">
+            <h4>Eco Warrior</h4>
+            <p>Save 1,000 liters of water</p>
+            <div class="achievement-progress">
+              <span>+100 pts</span>
+              <span class="status unlocked">✅ Unlocked</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="achievement-item progress">
+          <div class="achievement-icon">📝</div>
+          <div class="achievement-info">
+            <h4>Reporter Pro</h4>
+            <p>Submit 25 issue reports</p>
+            <div class="achievement-progress">
+              <div class="progress-bar small">
+                <div class="progress-fill" style="width: 68%"></div>
+              </div>
+              <span>17/25 • +250 pts</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="achievement-item locked">
+          <div class="achievement-icon">🚨</div>
+          <div class="achievement-info">
+            <h4>Emergency Responder</h4>
+            <p>Report 5 critical issues</p>
+            <div class="achievement-progress">
+              <span>+500 pts</span>
+              <span class="status locked">🔒 Locked</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="achievement-item progress">
+          <div class="achievement-icon">🤝</div>
+          <div class="achievement-info">
+            <h4>Community Helper</h4>
+            <p>Help resolve 10 community reports</p>
+            <div class="achievement-progress">
+              <div class="progress-bar small">
+                <div class="progress-fill" style="width: 40%"></span>
+              </div>
+              <span>4/10 • +300 pts</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="achievement-item locked">
+          <div class="achievement-icon">🏆</div>
+          <div class="achievement-info">
+            <h4>Water Guardian</h4>
+            <p>Reach Level 10</p>
+            <div class="achievement-progress">
+              <span>+1000 pts</span>
+              <span class="status locked">🔒 Locked</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <button class="btn outline" onclick="viewAllAchievements()">View All Achievements</button>
+      </div>
+    </section>
+
+    <!-- Points System -->
+    <section class="card points-system-card">
+      <div class="card-header">
+        <h2>⭐ Points System</h2>
+        <span class="points-guide">How to earn points</span>
+      </div>
+      <div class="points-grid">
+        <div class="points-category">
+          <h3>📝 Reporting</h3>
+          <div class="points-list">
+            <div class="points-item">
+              <span class="points-action">Submit issue report</span>
+              <span class="points-value">+10 pts</span>
+            </div>
+            <div class="points-item">
+              <span class="points-action">Critical issue report</span>
+              <span class="points-value">+50 pts</span>
+            </div>
+            <div class="points-item">
+              <span class="points-action">Report with photo</span>
+              <span class="points-value">+15 pts</span>
+            </div>
+            <div class="points-item">
+              <span class="points-action">Quick response report</span>
+              <span class="points-value">+20 pts</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="points-category">
+          <h3>💧 Conservation</h3>
+          <div class="points-list">
+            <div class="points-item">
+              <span class="points-action">Water saving tip</span>
+              <span class="points-value">+5 pts</span>
+            </div>
+            <div class="points-item">
+              <span class="points-action">Eco laundry service</span>
+              <span class="points-value">+25 pts</span>
+            </div>
+            <div class="points-item">
+              <span class="points-action">Report water wastage</span>
+              <span class="points-value">+15 pts</span>
+            </div>
+            <div class="points-item">
+              <span class="points-action">Conservation project</span>
+              <span class="points-value">+100 pts</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="points-category">
+          <h3>📚 Education</h3>
+          <div class="points-list">
+            <div class="points-item">
+              <span class="points-action">Complete water safety quiz</span>
+              <span class="points-value">+20 pts</span>
+            </div>
+            <div class="points-item">
+              <span class="points-action">Watch educational video</span>
+              <span class="points-value">+10 pts</span>
+            </div>
+            <div class="points-item">
+              <span class="points-action">Share water knowledge</span>
+              <span class="points-value">+15 pts</span>
+            </div>
+            <div class="points-item">
+              <span class="points-action">Attend workshop</span>
+              <span class="points-value">+50 pts</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="points-category">
+          <h3>🤝 Community</h3>
+          <div class="points-list">
+            <div class="points-item">
+              <span class="points-action">Help resolve issue</span>
+              <span class="points-value">+30 pts</span>
+            </div>
+            <div class="points-item">
+              <span class="points-action">Share alert</span>
+              <span class="points-value">+5 pts</span>
+            </div>
+            <div class="points-item">
+              <span class="points-action">Refer friend</span>
+              <span class="points-value">+50 pts</span>
+            </div>
+            <div class="points-item">
+              <span class="points-action">Community event</span>
+              <span class="points-value">+75 pts</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recent Activity -->
+    <section class="card activity-card">
+      <div class="card-header">
+        <h2>📊 Your Recent Activity</h2>
+        <button class="btn small outline" onclick="viewFullActivity()">View All</button>
+      </div>
+      <div class="activity-timeline">
+        <div class="activity-item">
+          <div class="activity-icon">💧</div>
+          <div class="activity-content">
+            <div class="activity-title">Water Leak Report</div>
+            <div class="activity-desc">Reported pipe leak near Academic Block</div>
+            <div class="activity-meta">+10 pts • 2 hours ago</div>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-icon">🌱</div>
+          <div class="activity-content">
+            <div class="activity-title">Eco Laundry Service</div>
+            <div class="activity-desc">Used eco wash mode for laundry</div>
+            <div class="activity-meta">+25 pts • 5 hours ago</div>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-icon">📚</div>
+          <div class="activity-content">
+            <div class="activity-title">Safety Quiz Completed</div>
+            <div class="activity-desc">Scored 100% on water safety quiz</div>
+            <div class="activity-meta">+20 pts • Yesterday</div>
+          </div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-icon">🤝</div>
+          <div class="activity-content">
+            <div class="activity-title">Community Help</div>
+            <div class="activity-desc">Helped resolve low pressure issue</div>
+            <div class="activity-meta">+30 pts • 2 days ago</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Rewards Section -->
+    <section class="card rewards-card">
+      <div class="card-header">
+        <h2>🎁 Available Rewards</h2>
+        <span class="rewards-count">Earn points to unlock rewards</span>
+      </div>
+      <div class="rewards-grid">
+        <div class="reward-item available">
+          <div class="reward-icon">☕</div>
+          <div class="reward-info">
+            <h4>Cafeteria Discount</h4>
+            <p>15% off on any beverage</p>
+            <div class="reward-cost">500 pts</div>
+          </div>
+          <button class="btn small" onclick="redeemReward('coffee')">Redeem</button>
+        </div>
+
+        <div class="reward-item available">
+          <div class="reward-icon">👕</div>
+          <div class="reward-info">
+            <h4>Free Laundry Service</h4>
+            <p>One free standard wash</p>
+            <div class="reward-cost">750 pts</div>
+          </div>
+          <button class="btn small" onclick="redeemReward('laundry')">Redeem</button>
+        </div>
+
+        <div class="reward-item locked">
+          <div class="reward-icon">🏪</div>
+          <div class="reward-info">
+            <h4>Stationery Voucher</h4>
+            <p>₹100 campus store voucher</p>
+            <div class="reward-cost">1,200 pts</div>
+          </div>
+          <button class="btn small disabled" disabled>Need 355 pts</button>
+        </div>
+
+        <div class="reward-item locked">
+          <div class="reward-icon">🎬</div>
+          <div class="reward-info">
+            <h4>Movie Ticket</h4>
+            <p>Free campus movie ticket</p>
+            <div class="reward-cost">2,000 pts</div>
+          </div>
+          <button class="btn small disabled" disabled>Need 1,155 pts</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Achievement Details Modal -->
+  <div id="achievementModal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>🏅 Achievement Details</h3>
+        <button class="btn icon" onclick="closeModal('achievementModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="achievement-detail">
+          <div class="achievement-header">
+            <div class="achievement-icon large">💧</div>
+            <div class="achievement-title">
+              <h4>Water Guardian</h4>
+              <p>Master level water conservation achievement</p>
+            </div>
+          </div>
+          
+          <div class="achievement-requirements">
+            <h5>Requirements:</h5>
+            <ul>
+              <li>✅ Reach Level 10</li>
+              <li>✅ Save 5,000+ liters of water</li>
+              <li>✅ Submit 50+ issue reports</li>
+              <li>✅ Complete all water safety quizzes</li>
+              <li>🔒 Help resolve 25 community issues (15/25)</li>
+            </ul>
+          </div>
+
+          <div class="achievement-rewards">
+            <h5>Rewards:</h5>
+            <div class="rewards-list">
+              <div class="reward-badge">+1000 pts</div>
+              <div class="reward-badge">🏆 Exclusive Badge</div>
+              <div class="reward-badge">🎁 Special Reward</div>
+            </div>
+          </div>
+
+          <div class="achievement-progress">
+            <h5>Your Progress:</h5>
+            <div class="progress-item">
+              <span>Overall Progress</span>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: 80%"></div>
+              </div>
+              <span>80%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn outline" onclick="closeModal('achievementModal')">Close</button>
+        <button class="btn primary" onclick="shareAchievement()">📤 Share Progress</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Redeem Reward Modal -->
+  <div id="redeemModal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>🎁 Redeem Reward</h3>
+        <button class="btn icon" onclick="closeModal('redeemModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="redeem-details">
+          <div class="reward-preview">
+            <div class="reward-icon large">☕</div>
+            <div class="reward-info">
+              <h4>Cafeteria Discount</h4>
+              <p>15% off on any beverage</p>
+              <div class="reward-cost">Cost: 500 points</div>
+            </div>
+          </div>
+
+          <div class="points-balance">
+            <div class="balance-info">
+              <span>Your Points Balance:</span>
+              <span class="points-amount">2,845 pts</span>
+            </div>
+            <div class="balance-after">
+              <span>Balance after redemption:</span>
+              <span class="points-amount">2,345 pts</span>
+            </div>
+          </div>
+
+          <div class="redemption-instructions">
+            <h5>How to use:</h5>
+            <p>Show this QR code at any campus cafeteria to avail your discount:</p>
+            <div class="qr-code">
+              <!-- QR code would be generated here -->
+              <div class="qr-placeholder">
+                <div class="qr-text">AQUAX-REWARD-COFFEE-15</div>
+                <small>Valid for 7 days</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn outline" onclick="closeModal('redeemModal')">Cancel</button>
+        <button class="btn primary" onclick="confirmRedemption()">✅ Confirm Redemption</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <span>AquaX Leaderboard • Gamifying Water Conservation at Karunya University</span>
+      <span>Next ranking update in: <span id="nextUpdate">23:45:12</span></span>
+    </div>
+  </footer>
+
+  <script>
+    // Leaderboard Management System
+    class LeaderboardManager {
+      constructor() {
+        this.currentView = 'global';
+        this.rankings = [];
+        this.userData = {
+          name: 'You',
+          points: 2845,
+          rank: 15,
+          level: 8,
+          achievements: 12
+        };
+        this.setupEventListeners();
+        this.loadLeaderboard();
+        this.startCountdown();
+      }
+
+      setupEventListeners() {
+        // Tab navigation
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+          tab.addEventListener('click', (e) => {
+            this.switchTab(e.target.dataset.tab);
+          });
+        });
+
+        // Language switcher
+        const langSwitcher = document.getElementById('langSwitcher');
+        langSwitcher.value = localStorage.getItem('ax_lang') || 'en';
+        langSwitcher.addEventListener('change', (e) => {
+          localStorage.setItem('ax_lang', e.target.value);
+          this.showNotification(`Language changed to ${e.target.value}`);
+        });
+
+        // Filter changes
+        document.getElementById('timeFilter').addEventListener('change', () => this.updateLeaderboard());
+        document.getElementById('categoryFilter').addEventListener('change', () => this.updateLeaderboard());
+      }
+
+      switchTab(tab) {
+        // Update active tab
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+        
+        this.currentView = tab;
+        this.updateLeaderboard();
+        this.showNotification(`Switched to ${this.getTabName(tab)} view`);
+      }
+
+      getTabName(tab) {
+        const names = {
+          global: 'Global Ranking',
+          monthly: 'Monthly Ranking',
+          hostels: 'Hostel Ranking',
+          departments: 'Department Ranking',
+          friends: 'Friends Ranking'
+        };
+        return names[tab] || tab;
+      }
+
+      loadLeaderboard() {
+        // Simulate loading leaderboard data
+        this.rankings = this.generateSampleRankings();
+        this.renderLeaderboard();
+        this.updateUserStats();
+      }
+
+      generateSampleRankings() {
+        const names = [
+          'Arjun Kumar', 'Priya Sharma', 'Dr. Suresh', 'Meena Patel', 'Rajesh Kumar',
+          'Anjali Singh', 'Vikram Joshi', 'Sneha Reddy', 'Karthik M', 'Deepa Nair',
+          'Rahul Sharma', 'Pooja Mehta', 'Sanjay Kumar', 'Neha Gupta', 'You',
+          'Amit Singh', 'Divya Patel', 'Rohit Kumar', 'Shweta Iyer', 'Manoj Nair'
+        ];
+
+        return names.map((name, index) => ({
+          rank: index + 1,
+          name: name,
+          points: 5420 - (index * 120),
+          level: Math.floor((5420 - (index * 120)) / 400) + 1,
+          avatar: this.getRandomAvatar(),
+          title: this.getRandomTitle(),
+          stats: {
+            reports: Math.floor(Math.random() * 50) + 10,
+            waterSaved: Math.floor(Math.random() * 5000) + 1000,
+            streak: Math.floor(Math.random() * 20)
+          },
+          isCurrentUser: name === 'You'
+        }));
+      }
+
+      getRandomAvatar() {
+        const avatars = ['👨‍🎓', '👩‍🎓', '👨‍💼', '👩‍💼', '👨‍🔬', '👩‍🔬'];
+        return avatars[Math.floor(Math.random() * avatars.length)];
+      }
+
+      getRandomTitle() {
+        const titles = [
+          'Water Guardian', 'Eco Warrior', 'Conservation Hero', 'Green Champion',
+          'Sustainability Leader', 'Environment Protector', 'Water Saver', 'Eco Ambassador'
+        ];
+        return titles[Math.floor(Math.random() * titles.length)];
+      }
+
+      renderLeaderboard() {
+        const container = document.getElementById('leaderboardList');
+        const rankingsToShow = this.rankings.slice(3); // Skip top 3 (podium)
+        
+        container.innerHTML = rankingsToShow.map(user => this.createRankingItem(user)).join('');
+      }
+
+      createRankingItem(user) {
+        return `
+          <div class="ranking-item ${user.isCurrentUser ? 'current-user' : ''}">
+            <div class="rank-number">${user.rank}</div>
+            <div class="user-avatar">
+              <div class="avatar-icon">${user.avatar}</div>
+              ${user.stats.streak > 7 ? '<div class="streak-badge">🔥</div>' : ''}
+            </div>
+            <div class="user-info">
+              <h4>${user.name}</h4>
+              <p class="user-title">${user.title}</p>
+              <div class="user-stats">
+                <span>💧 ${user.stats.waterSaved.toLocaleString()}L saved</span>
+                <span>📝 ${user.stats.reports} reports</span>
+                ${user.stats.streak > 0 ? `<span>🔥 ${user.stats.streak} day streak</span>` : ''}
+              </div>
+            </div>
+            <div class="points-info">
+              <div class="points-amount">${user.points.toLocaleString()} pts</div>
+              <div class="level-badge">Lvl ${user.level}</div>
+            </div>
+            <div class="ranking-actions">
+              <button class="btn icon small" onclick="viewUserProfile(${user.rank})" title="View Profile">👁️</button>
+              ${!user.isCurrentUser ? `<button class="btn icon small" onclick="challengeUser(${user.rank})" title="Challenge">⚡</button>` : ''}
+            </div>
+          </div>
+        `;
+      }
+
+      updateUserStats() {
+        document.getElementById('userRank').textContent = this.userData.rank;
+        document.getElementById('userPoints').textContent = this.userData.points.toLocaleString();
+        document.getElementById('userName').textContent = this.userData.name;
+        
+        // Update header stats
+        document.getElementById('totalParticipants').textContent = this.rankings.length.toLocaleString();
+        document.getElementById('totalPoints').textContent = this.rankings.reduce((sum, user) => sum + user.points, 0).toLocaleString();
+        document.getElementById('waterSaved').textContent = (this.rankings.reduce((sum, user) => sum + user.stats.waterSaved, 0) / 1000).toFixed(0) + 'K';
+      }
+
+      updateLeaderboard() {
+        const timeFilter = document.getElementById('timeFilter').value;
+        const categoryFilter = document.getElementById('categoryFilter').value;
+        
+        // In a real app, this would filter data from server
+        this.showNotification(`Leaderboard updated for ${timeFilter} - ${categoryFilter}`);
+        this.renderLeaderboard();
+      }
+
+      startCountdown() {
+        // Update countdown every second
+        setInterval(() => {
+          const now = new Date();
+          const nextUpdate = new Date();
+          nextUpdate.setHours(24, 0, 0, 0); // Next day at midnight
+          
+          const diff = nextUpdate - now;
+          const hours = Math.floor(diff / (1000 * 60 * 60));
+          const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+          
+          document.getElementById('nextUpdate').textContent = 
+            `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }, 1000);
+      }
+
+      showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `leaderboard-notification ${type}`;
+        notification.textContent = message;
+        notification.style.cssText = `
+          position: fixed;
+          top: 80px;
+          right: 20px;
+          background: var(--glass-bg);
+          backdrop-filter: blur(20px);
+          border: 1px solid var(--glass-border);
+          border-radius: 10px;
+          padding: 12px 18px;
+          color: var(--text-light);
+          z-index: 10000;
+          box-shadow: var(--glass-shadow);
+          animation: slideInRight 0.3s ease;
+          max-width: 300px;
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+          if (notification.parentNode) {
+            notification.style.animation = 'slideOutRight 0.3s ease';
+            setTimeout(() => notification.remove(), 300);
+          }
+        }, 3000);
+      }
+    }
+
+    // Global Functions
+    let leaderboardManager;
+
+    function toggleView() {
+      const container = document.querySelector('.leaderboard-container');
+      container.classList.toggle('compact-view');
+      leaderboardManager.showNotification(
+        container.classList.contains('compact-view') ? 
+        'Compact view enabled' : 'Detailed view enabled'
+      );
+    }
+
+    function shareLeaderboard() {
+      if (navigator.share) {
+        navigator.share({
+          title: 'AquaX Leaderboard',
+          text: `Check out my rank on AquaX Leaderboard! I'm ranked #${leaderboardManager.userData.rank} with ${leaderboardManager.userData.points} points.`,
+          url: window.location.href
+        });
+      } else {
+        navigator.clipboard.writeText(window.location.href);
+        leaderboardManager.showNotification('Leaderboard link copied to clipboard!');
+      }
+    }
+
+    function loadMoreRankings() {
+      leaderboardManager.showNotification('Loading more rankings...');
+      // Simulate loading delay
+      setTimeout(() => {
+        leaderboardManager.showNotification('Additional rankings loaded');
+      }, 1000);
+    }
+
+    function viewAchievements() {
+      showModal('achievementModal');
+    }
+
+    function viewActivity() {
+      leaderboardManager.showNotification('Opening activity history...');
+    }
+
+    function viewAllAchievements() {
+      leaderboardManager.showNotification('Opening achievements gallery...');
+    }
+
+    function viewFullActivity() {
+      leaderboardManager.showNotification('Opening full activity log...');
+    }
+
+    function redeemReward(rewardType) {
+      // Update redeem modal based on reward type
+      const rewards = {
+        coffee: { name: 'Cafeteria Discount', cost: 500, icon: '☕' },
+        laundry: { name: 'Free Laundry Service', cost: 750, icon: '👕' }
+      };
+      
+      const reward = rewards[rewardType];
+      if (reward) {
+        document.querySelector('#redeemModal .reward-icon').textContent = reward.icon;
+        document.querySelector('#redeemModal h4').textContent = reward.name;
+        document.querySelector('#redeemModal .reward-cost').textContent =

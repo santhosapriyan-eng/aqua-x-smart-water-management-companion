@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AquaX - Engineering Performance Leaderboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* CSS for AquaX Leaderboard */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a2a5e, #1a3a6e, #2a4a7e);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0 40px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .logo-icon {
+            font-size: 2.5rem;
+            color: #00e5ff;
+            text-shadow: 0 0 15px rgba(0, 229, 255, 0.7);
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(90deg, #00e5ff, #00b8d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #a0b0ff;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .stats-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stats-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #a0b0ff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat:last-child {
+            border-bottom: none;
+        }
+
+        .stat-value {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 15px 12px 45px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .search-box input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .search-box input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.5);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .filter-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .filter-btn.active {
+            background: rgba(0, 229, 255, 0.3);
+            font-weight: 600;
+        }
+
+        .leaderboard {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .leaderboard-header {
+            display: grid;
+            grid-template-columns: 80px 1fr 120px 120px 120px 120px;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.15);
+            font-weight: 600;
+            color: #a0b0ff;
+        }
+
+        @media (max-width: 768px) {
+            .leaderboard-header {
+                grid-template-columns: 50px 1fr 80px 80px;
+                font-size: 0.8rem;
+            }
+            
+            .leaderboard-header div:nth-child(5),
+            .leaderboard-header div:nth-child(6) {
+                display: none;
+            }
+        }
+
+        .leaderboard-list {
+            list-style: none;
+        }
+
+        .leaderboard-item {
+            display: grid;
+            grid-template-columns: 80px 1fr 120px 120px 120px 120px;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .leaderboard-item {
+                grid-template-columns: 50px 1fr 80px 80px;
+            }
+            
+            .leaderboard-item div:nth-child(5),
+            .leaderboard-item div:nth-child(6) {
+                display: none;
+            }
+        }
+
+        .leaderboard-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .leaderboard-item.top-3 {
+            background: linear-gradient(90deg, 
+                rgba(0, 229, 255, 0.15) 0%, 
+                rgba(255, 255, 255, 0.05) 100%);
+        }
+
+        .rank {
+            font-size: 1.3rem;
+            font-weight: 700;
+            text-align: center;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .rank-1 {
+            color: #00e5ff;
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+        }
+
+        .rank-2 {
+            color: #00b8d4;
+            text-shadow: 0 0 10px rgba(0, 184, 212, 0.5);
+        }
+
+        .rank-3 {
+            color: #0097a7;
+            text-shadow: 0 0 10px rgba(0, 151, 167, 0.5);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .avatar.rank-1 {
+            border-color: #00e5ff;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
+        }
+
+        .avatar.rank-2 {
+            border-color: #00b8d4;
+            box-shadow: 0 0 15px rgba(0, 184, 212, 0.5);
+        }
+
+        .avatar.rank-3 {
+            border-color: #0097a7;
+            box-shadow: 0 0 15px rgba(0, 151, 167, 0.5);
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .user-title {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85rem;
+        }
+
+        .score {
+            font-weight: 700;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+
+        .metric {
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            border-radius: 4px;
+        }
+
+        .productivity .progress-bar {
+            background: linear-gradient(90deg, #00e5ff, #00b8d4);
+        }
+
+        .quality .progress-bar {
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+        }
+
+        .initiative .progress-bar {
+            background: linear-gradient(90deg, #FF9800, #FFC107);
+        }
+
+        .trend {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            font-weight: 600;
+        }
+
+        .trend.up {
+            color: #4CAF50;
+        }
+
+        .trend.down {
+            color: #F44336;
+        }
+
+        .trend.neutral {
+            color: #FFC107;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 0 20px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .badge.top-performer {
+            background: rgba(0, 229, 255, 0.3);
+            color: #00e5ff;
+        }
+
+        .badge.rising {
+            background: rgba(76, 175, 80, 0.3);
+            color: #4CAF50;
+        }
+
+        .badge.consistent {
+            background: rgba(255, 152, 0, 0.3);
+            color: #FF9800;
+        }
+
+        .period-selector {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .period-btn {
+            padding: 8px 20px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .period-btn:first-child {
+            border-radius: 10px 0 0 10px;
+        }
+
+        .period-btn:last-child {
+            border-radius: 0 10px 10px 0;
+        }
+
+        .period-btn.active {
+            background: rgba(0, 229, 255, 0.3);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-water logo-icon"></i>
+                <h1>AquaX Engineering</h1>
+            </div>
+            <p class="subtitle">Performance metrics and productivity tracking for our engineering teams</p>
+        </header>
+
+        <div class="period-selector">
+            <button class="period-btn active">Weekly</button>
+            <button class="period-btn">Monthly</button>
+            <button class="period-btn">Quarterly</button>
+        </div>
+
+        <div class="dashboard">
+            <div class="stats-card">
+                <h2 class="stats-title"><i class="fas fa-chart-line"></i> Team Stats</h2>
+                <div class="stat">
+                    <span>Total Engineers</span>
+                    <span class="stat-value">24</span>
+                </div>
+                <div class="stat">
+                    <span>Avg. Productivity</span>
+                    <span class="stat-value">87%</span>
+                </div>
+                <div class="stat">
+                    <span>Avg. Code Quality</span>
+                    <span class="stat-value">92%</span>
+                </div>
+                <div class="stat">
+                    <span>Top Performer</span>
+                    <span class="stat-value">Sarah Chen</span>
+                </div>
+                <div class="stat">
+                    <span>Most Improved</span>
+                    <span class="stat-value">Alex Rodriguez</span>
+                </div>
+            </div>
+
+            <div class="stats-card">
+                <h2 class="stats-title"><i class="fas fa-trophy"></i> This Week's Top Performers</h2>
+                <div class="stat">
+                    <span>1. Sarah Chen</span>
+                    <span class="stat-value">98.5 pts</span>
+                </div>
+                <div class="stat">
+                    <span>2. Michael Johnson</span>
+                    <span class="stat-value">96.2 pts</span>
+                </div>
+                <div class="stat">
+                    <span>3. Emily Watson</span>
+                    <span class="stat-value">94.7 pts</span>
+                </div>
+                <div class="stat">
+                    <span>4. David Kim</span>
+                    <span class="stat-value">93.1 pts</span>
+                </div>
+                <div class="stat">
+                    <span>5. Alex Rodriguez</span>
+                    <span class="stat-value">91.8 pts</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" placeholder="Search engineers...">
+            </div>
+            <div class="filter-buttons">
+                <button class="filter-btn active">All Teams</button>
+                <button class="filter-btn">Frontend</button>
+                <button class="filter-btn">Backend</button>
+                <button class="filter-btn">DevOps</button>
+                <button class="filter-btn">QA</button>
+            </div>
+        </div>
+
+        <div class="leaderboard">
+            <div class="leaderboard-header">
+                <div>Rank</div>
+                <div>Engineer</div>
+                <div>Score</div>
+                <div>Productivity</div>
+                <div>Quality</div>
+                <div>Initiative</div>
+            </div>
+            <ul class="leaderboard-list">
+                <!-- Engineer 1 -->
+                <li class="leaderboard-item top-3">
+                    <div class="rank rank-1">1</div>
+                    <div class="user-info">
+                        <img src="https://i.pravatar.cc/150?img=1" alt="Sarah Chen" class="avatar rank-1">
+                        <div class="user-details">
+                            <div class="user-name">Sarah Chen <span class="badge top-performer">TOP PERFORMER</span></div>
+                            <div class="user-title">Senior Full Stack Engineer</div>
+                        </div>
+                    </div>
+                    <div class="score">98.5</div>
+                    <div class="metric productivity">
+                        96%
+                        <div class="progress-container">
+                            <div class="progress-bar" style="width: 96%"></div>
+                        </div>
+                    </div>
+                    <div class="metric quality">
+                        99%
+                        <div class="progress-container">
+                            <div class="progress-bar" style="width: 99%"></div>
+                        </div>
+                    </div>
+                    <div class="metric initiative">
+                        95%
+                        <div class="progress-container">
+                            <div class="progress-bar" style="width: 95%"></div>
+                        </div>
+                    </div>
+                </li>
+
+                <!-- Engineer 2 -->
+                <li class="leaderboard-item top-3">
+                    <div class="rank rank-2">2</div>
+                    <div class="user-info">
+                        <img src="https://i.pravatar.cc/150?img=5" alt="Michael Johnson" class="avatar rank-2">
+                        <div class="user-details">
+                            <div class="user-name">Michael Johnson <span class="badge consistent">CONSISTENT</span></div>
+                            <div class="user-title">Backend Architect</div>
+                        </div>
+                    </div>
+                    <div class="score">96.2</div>
+                    <div class="metric productivity">
+                        94%
+                        <div class="progress-container">
+                            <div class="progress-bar" style="width: 94%"></div>
+                        </div>
+                    </div>
+                    <div class="metric quality">
+                        97%
+                        <div class="progress-container">
+                            <div class="progress-bar" style="width: 97%"></div>
+                        </div>
+                    </div>
+                    <div class="metric initiative">
+                        92%
+                        <div class="progress-container">
+                            <div class="progress-bar" style="width: 92%"></div>
+                        </div>
+                    </div>
+                </li>
+
+                <!-- Engineer 3 -->
+                <li class="leaderboard-item top-3">
+                    <div class="rank rank-3">3</div>
+                    <div class="user-info">
+                        <img src="https://i.pravatar.cc/150?img=11" alt="Emily Watson" class="avatar rank-3">
+                        <div class="user-details">
+                            <div class="user-name">Emily Watson</div>
+                            <div class="user-title">Frontend Lead</div>
+                        </div>
+                    </div>
+                    <div class="score">94.7</div>
+                    <div class="metric productivity">
+                        92%
+                        <div class="progress-container">
+                            <div class="progress-bar" style="width: 92%"></div>
+                        </div>
+                    </div>
+                    <div class="metric quality">
+                        95%
+                        <div class="progress-container">
+                            <div class="progress-bar" style="width: 95%"></div>
+                        </div>
+                    </div>
+                    <div class="metric initiative">
+                        96%
+                        <div class="progress-container">
+                            <div class="progress-bar" style="width: 96%"></div>
+                        </div>
+                    </div>
+                </li>
+
+                <!-- Engineer 4 -->
+                <li class="leaderboard-item">
+                    <div class="rank">4</div>
+                    <div class="user-info">
+                        <img src="https://i.pravatar.cc/150?img=8" alt="David Kim" class="avatar">
+                        <div class="user-details">
+                            <div class="user-name">David Kim</div>
+                            <div class="user-title">DevOps Engineer</div>
+                        </div>
+                    </div>
+                    <div class="score">93.1</div>
+                    <div class="metric productivity">
+                        90%
+                        <div class="progress-container">
+                            <div class="progress-bar" style="width: 90%"></div>
+                        </div>
+                    </div>
+                    <div class="metric quality">
+                        94%
+                        <div class="progress-container">
+                            <div class="progress-bar" style="width: 94%"></div>
+                        </div>
+                    </div>
+                    <div class="metric initiative">
+                        91%
+                        <div class="progress-container">
+                            <div class="progress-bar" style="width: 91%"></div>
+                        </div>
+                    </div>
+                </li>
+
+                <!-- Engineer 5 -->
+                <li class="leaderboard-item">
+                    <div class="rank">5</div>
+                    <div class="user-info">
+                        <img src="https://i.pravatar.cc/150?img=12" alt="Alex Rodriguez" class="avatar">
+                        <div class="user-details">
+                            <div class="user-name">Alex Rodriguez <span class="badge rising">RISING</span></div>
+                            <div class="user-title">Junior Full Stack Developer</div>
+                        </div>
+                    </div>
+                    <div class="score">91.8</div>
+                    <div class="metric productivity">
+                        88%
+                        <div class="progress-container">
+                            <div class="progress-bar" style="width: 88%"></div>
+                        </div>
+                    </div>
+                    <div class="metric quality">
+                        92%
+                        <div class="progress-container">
+                            <div class="progress-bar" style="width: 92%"></div>
+                        </div>
+                    </div>
+                    <div class="metric initiative">
+                        89%
+                        <div class="progress-container">
+                            <div class="progress-bar" style="width: 89%"></div>
+                        </div>
+                    </div>
+                </li>
+
+                <!-- Add more engineers as needed -->
+            </ul>
+        </div>
+
+        <footer>
+            <p>AquaX Engineering Performance Dashboard • Updated: June 15, 2023</p>
+            <p>Data refreshes every 24 hours • Contact admin for data corrections</p>
+        </footer>
+    </div>
+
+    <script>
+        // Simple JavaScript for interactive elements
+        document.addEventListener('DOMContentLoaded', function() {
+            // Filter buttons functionality
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            // Period selector functionality
+            const periodButtons = document.querySelectorAll('.period-btn');
+            periodButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    periodButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            // Search functionality
+            const searchInput = document.querySelector('.search-box input');
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                const items = document.querySelectorAll('.leaderboard-item');
+                
+                items.forEach(item => {
+                    const name = item.querySelector('.user-name').textContent.toLowerCase();
+                    if (name.includes(searchTerm)) {
+                        item.style.display = 'grid';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

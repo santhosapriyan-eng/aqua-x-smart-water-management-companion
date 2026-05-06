@@ -1,0 +1,156 @@
+/* Map Page Specific Styles */
+@import "./base.css";
+
+.map-container {
+  position: relative;
+  height: calc(100vh - 80px);
+  width: 100%;
+  overflow: hidden;
+}
+
+#map {
+  height: 100%;
+  width: 100%;
+  background: var(--bg-dark);
+}
+
+/* Simple Controls */
+.simple-controls {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 1000;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.simple-controls .btn {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  color: var(--text-light);
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.simple-controls .btn:hover {
+  background: var(--primary-blue);
+  transform: translateY(-2px);
+}
+
+.simple-controls .btn.primary {
+  background: var(--primary-blue);
+}
+
+/* Map Status */
+.map-status {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  padding: 15px 20px;
+  color: var(--text-light);
+  z-index: 1000;
+  box-shadow: var(--glass-shadow);
+}
+
+.status-item {
+  margin: 5px 0;
+}
+
+.status-item strong {
+  color: var(--primary-light);
+}
+
+/* Leaflet Popup Customization */
+.leaflet-popup-content-wrapper {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  color: var(--text-light);
+}
+
+.leaflet-popup-tip {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+}
+
+.leaflet-popup-content {
+  margin: 8px 12px;
+  line-height: 1.4;
+}
+
+.leaflet-popup-content h3,
+.leaflet-popup-content h4 {
+  margin: 5px 0;
+  color: var(--text-light);
+}
+
+.leaflet-popup-content p {
+  margin: 5px 0;
+  color: var(--text-muted);
+}
+
+/* Marker Animations */
+.leaflet-marker-icon {
+  transition: transform 0.3s ease;
+}
+
+.leaflet-marker-icon:hover {
+  transform: scale(1.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .simple-controls {
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    justify-content: center;
+  }
+  
+  .simple-controls .btn {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  
+  .map-status {
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    text-align: center;
+  }
+}
+
+/* Loading State */
+.map-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-light);
+  font-size: 18px;
+}
+
+.map-loading::after {
+  content: '';
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--primary-light);
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-left: 10px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

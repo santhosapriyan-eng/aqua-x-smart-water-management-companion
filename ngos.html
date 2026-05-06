@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AquaX - NGO Partnerships</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #00A8E8;
+            --primary-light: #4DC9FF;
+            --primary-dark: #0077B6;
+            --secondary: #00C9B1;
+            --accent: #FF6B6B;
+            --light: #F8F9FA;
+            --dark: #343A40;
+            --gray: #6C757D;
+            --success: #28A745;
+            --warning: #FFC107;
+            --danger: #DC3545;
+            --ocean: #0077B6;
+            --aqua: #00C9B1;
+            --deep-blue: #03045E;
+        }
+
+        body {
+            background: linear-gradient(135deg, #e6f7ff 0%, #ccefff 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Styles */
+        header {
+            background: linear-gradient(135deg, var(--deep-blue) 0%, var(--ocean) 100%);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            font-size: 2.5rem;
+            color: var(--primary-light);
+            text-shadow: 0 0 10px rgba(0, 200, 255, 0.5);
+        }
+
+        .logo-text h1 {
+            font-size: 2.2rem;
+            margin-bottom: 5px;
+            background: linear-gradient(90deg, #00e5ff, #00b8d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-text p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 25px;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 8px 15px;
+            border-radius: 5px;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 80px 0;
+            text-align: center;
+            background: url('https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80') no-repeat center center;
+            background-size: cover;
+            position: relative;
+            color: white;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(3, 4, 94, 0.7);
+        }
+
+        .hero-content {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h2 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 168, 232, 0.4);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid white;
+            color: white;
+        }
+
+        .btn-outline:hover {
+            background: white;
+            color: var(--dark);
+        }
+
+        /* Stats Section */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            padding: 60px 0;
+        }
+
+        @media (max-width: 768px) {
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 30px 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: var(--gray);
+        }
+
+        /* NGO Grid */
+        .section-title {
+            text-align: center;
+            margin: 60px 0 40px;
+        }
+
+        .section-title h2 {
+            font-size: 2.5rem;
+            color: var(--deep-blue);
+            margin-bottom: 15px;
+        }
+
+        .section-title p {
+            font-size: 1.2rem;
+            color: var(--gray);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .ngo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .ngo-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .ngo-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .ngo-header {
+            height: 180px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .ngo-logo {
+            position: absolute;
+            bottom: -30px;
+            left: 20px;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            border: 3px solid white;
+        }
+
+        .ngo-logo i {
+            font-size: 2rem;
+            color: var(--primary);
+        }
+
+        .ngo-content {
+            padding: 40px 20px 20px;
+        }
+
+        .ngo-content h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        .ngo-content p {
+            color: var(--gray);
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        .ngo-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .tag {
+            padding: 5px 12px;
+            background: rgba(0, 200, 255, 0.1);
+            color: var(--primary-dark);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .tag.ocean {
+            background: rgba(0, 119, 182, 0.1);
+            color: var(--ocean);
+        }
+
+        .tag.aqua {
+            background: rgba(0, 201, 177, 0.1);
+            color: var(--aqua);
+        }
+
+        .ngo-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .impact {
+            display: flex;
+            gap: 15px;
+        }
+
+        .impact-item {
+            text-align: center;
+        }
+
+        .impact-value {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--primary);
+        }
+
+        .impact-label {
+            font-size: 0.7rem;
+            color: var(--gray);
+        }
+
+        /* Partnership Section */
+        .partnership {
+            background: linear-gradient(135deg, var(--deep-blue) 0%, var(--ocean) 100%);
+            color: white;
+            padding: 80px 0;
+            text-align: center;
+        }
+
+        .partnership h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .partnership p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 40px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .partnership-steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 768px) {
+            .partnership-steps {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .step {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .step:hover {
+            transform: translateY(-5px);
+        }
+
+        .step-icon {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: var(--primary-light);
+        }
+
+        .step h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        .step p {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 60px 0 30px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .footer-logo h3 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            background: linear-gradient(90deg, #00e5ff, #00b8d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .footer-logo p {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 20px;
+        }
+
+        .footer-links h4 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .footer-links ul {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-light);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        /* Filter Buttons */
+        .filters {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 30px;
+            background: white;
+            color: var(--dark);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .filter-btn.active, .filter-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-water logo-icon"></i>
+                    <div class="logo-text">
+                        <h1>AquaX</h1>
+                        <p>Water Conservation & NGO Partnerships</p>
+                    </div>
+                </div>
+                <div class="nav-links">
+                    <a href="#" class="nav-link">Home</a>
+                    <a href="#" class="nav-link active">NGOs</a>
+                    <a href="#" class="nav-link">Projects</a>
+                    <a href="#" class="nav-link">Impact</a>
+                    <a href="#" class="nav-link">Contact</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h2>Partnering for a Water-Secure Future</h2>
+                <p>AquaX collaborates with leading NGOs worldwide to address water challenges through innovation, technology, and community engagement.</p>
+                <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                    <button class="btn btn-primary"><i class="fas fa-handshake"></i> Partner With Us</button>
+                    <button class="btn btn-outline"><i class="fas fa-search"></i> Explore NGOs</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="container">
+        <div class="stats">
+            <div class="stat-card">
+                <i class="fas fa-handshake stat-icon"></i>
+                <div class="stat-value">42</div>
+                <div class="stat-label">NGO Partners</div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-globe-americas stat-icon"></i>
+                <div class="stat-value">28</div>
+                <div class="stat-label">Countries</div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-tint stat-icon"></i>
+                <div class="stat-value">5.2M</div>
+                <div class="stat-label">Liters Clean Water</div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-users stat-icon"></i>
+                <div class="stat-value">850K</div>
+                <div class="stat-label">People Impacted</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NGO Partners Section -->
+    <section class="container">
+        <div class="section-title">
+            <h2>Our NGO Partners</h2>
+            <p>Collaborating with organizations that share our vision for sustainable water solutions and environmental conservation.</p>
+        </div>
+
+        <div class="filters">
+            <button class="filter-btn active">All NGOs</button>
+            <button class="filter-btn">Water Access</button>
+            <button class="filter-btn">Conservation</button>
+            <button class="filter-btn">Education</button>
+            <button class="filter-btn">Technology</button>
+        </div>
+
+        <div class="ngo-grid">
+            <!-- NGO 1 -->
+            <div class="ngo-card">
+                <div class="ngo-header" style="background-image: url('https://images.unsplash.com/photo-1569163139394-de44cb2c8cb7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80');">
+                    <div class="ngo-logo">
+                        <i class="fas fa-hand-holding-water"></i>
+                    </div>
+                </div>
+                <div class="ngo-content">
+                    <h3>Water for All Initiative</h3>
+                    <p>Providing sustainable water access solutions to underserved communities in Sub-Saharan Africa through well drilling and purification systems.</p>
+                    <div class="ngo-tags">
+                        <span class="tag">Water Access</span>
+                        <span class="tag">Africa</span>
+                        <span class="tag">Community Development</span>
+                    </div>
+                    <div class="ngo-footer">
+                        <div class="impact">
+                            <div class="impact-item">
+                                <div class="impact-value">320+</div>
+                                <div class="impact-label">Wells Built</div>
+                            </div>
+                            <div class="impact-item">
+                                <div class="impact-value">150K</div>
+                                <div class="impact-label">People Served</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" style="padding: 8px 15px; font-size: 0.9rem;">Learn More</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NGO 2 -->
+            <div class="ngo-card">
+                <div class="ngo-header" style="background-image: url('https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80');">
+                    <div class="ngo-logo">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                </div>
+                <div class="ngo-content">
+                    <h3>Ocean Guardians</h3>
+                    <p>Protecting marine ecosystems through conservation efforts, plastic pollution reduction, and community education programs in coastal regions.</p>
+                    <div class="ngo-tags">
+                        <span class="tag ocean">Marine Conservation</span>
+                        <span class="tag">Plastic Reduction</span>
+                        <span class="tag">Education</span>
+                    </div>
+                    <div class="ngo-footer">
+                        <div class="impact">
+                            <div class="impact-item">
+                                <div class="impact-value">45</div>
+                                <div class="impact-label">Beaches Cleaned</div>
+                            </div>
+                            <div class="impact-item">
+                                <div class="impact-value">12K</div>
+                                <div class="impact-label">Volunteers</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" style="padding: 8px 15px; font-size: 0.9rem;">Learn More</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NGO 3 -->
+            <div class="ngo-card">
+                <div class="ngo-header" style="background-image: url('https://images.unsplash.com/photo-1559827260-dc66d52bef19?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80');">
+                    <div class="ngo-logo">
+                        <i class="fas fa-recycle"></i>
+                    </div>
+                </div>
+                <div class="ngo-content">
+                    <h3>AquaPure Solutions</h3>
+                    <p>Developing and deploying innovative water purification technologies for communities facing water contamination challenges in South Asia.</p>
+                    <div class="ngo-tags">
+                        <span class="tag aqua">Water Purification</span>
+                        <span class="tag">Technology</span>
+                        <span class="tag">South Asia</span>
+                    </div>
+                    <div class="ngo-footer">
+                        <div class="impact">
+                            <div class="impact-item">
+                                <div class="impact-value">85</div>
+                                <div class="impact-label">Systems Deployed</div>
+                            </div>
+                            <div class="impact-item">
+                                <div class="impact-value">75K</div>
+                                <div class="impact-label">Liters/Day</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" style="padding: 8px 15px; font-size: 0.9rem;">Learn More</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NGO 4 -->
+            <div class="ngo-card">
+                <div class="ngo-header" style="background-image: url('https://images.unsplash.com/photo-1582213782116-b2a0a6d66e51?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80');">
+                    <div class="ngo-logo">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                </div>
+                <div class="ngo-content">
+                    <h3>WaterWise Education</h3>
+                    <p>Empowering the next generation through water conservation education programs in schools and communities across Latin America.</p>
+                    <div class="ngo-tags">
+                        <span class="tag">Education</span>
+                        <span class="tag">Latin America</span>
+                        <span class="tag">Youth Engagement</span>
+                    </div>
+                    <div class="ngo-footer">
+                        <div class="impact">
+                            <div class="impact-item">
+                                <div class="impact-value">320</div>
+                                <div class="impact-label">Schools</div>
+                            </div>
+                            <div class="impact-item">
+                                <div class="impact-value">45K</div>
+                                <div class="impact-label">Students</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" style="padding: 8px 15px; font-size: 0.9rem;">Learn More</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NGO 5 -->
+            <div class="ngo-card">
+                <div class="ngo-header" style="background-image: url('https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80');">
+                    <div class="ngo-logo">
+                        <i class="fas fa-tint-slash"></i>
+                    </div>
+                </div>
+                <div class="ngo-content">
+                    <h3>Desert Water Project</h3>
+                    <p>Implementing innovative water harvesting and conservation techniques in arid regions to combat drought and water scarcity.</p>
+                    <div class="ngo-tags">
+                        <span class="tag">Water Conservation</span>
+                        <span class="tag">Arid Regions</span>
+                        <span class="tag">Innovation</span>
+                    </div>
+                    <div class="ngo-footer">
+                        <div class="impact">
+                            <div class="impact-item">
+                                <div class="impact-value">18</div>
+                                <div class="impact-label">Communities</div>
+                            </div>
+                            <div class="impact-item">
+                                <div class="impact-value">2.5M</div>
+                                <div class="impact-label">Liters Saved</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" style="padding: 8px 15px; font-size: 0.9rem;">Learn More</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NGO 6 -->
+            <div class="ngo-card">
+                <div class="ngo-header" style="background-image: url('https://images.unsplash.com/photo-1569163139394-de44cb2c8cb7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80');">
+                    <div class="ngo-logo">
+                        <i class="fas fa-fish"></i>
+                    </div>
+                </div>
+                <div class="ngo-content">
+                    <h3>River Guardians</h3>
+                    <p>Protecting freshwater ecosystems through river cleanup initiatives, biodiversity monitoring, and community-based conservation programs.</p>
+                    <div class="ngo-tags">
+                        <span class="tag ocean">River Conservation</span>
+                        <span class="tag">Biodiversity</span>
+                        <span class="tag">Community</span>
+                    </div>
+                    <div class="ngo-footer">
+                        <div class="impact">
+                            <div class="impact-item">
+                                <div class="impact-value">240</div>
+                                <div class="impact-label">River Miles</div>
+                            </div>
+                            <div class="impact-item">
+                                <div class="impact-value">8.5K</div>
+                                <div class="impact-label">Volunteers</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" style="padding: 8px 15px; font-size: 0.9rem;">Learn More</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Partnership Section -->
+    <section class="partnership">
+        <div class="container">
+            <h2>Become an AquaX Partner</h2>
+            <p>Join our network of NGOs working together to create sustainable water solutions and make a lasting impact on global water challenges.</p>
+            
+            <div class="partnership-steps">
+                <div class="step">
+                    <i class="fas fa-clipboard-list step-icon"></i>
+                    <h3>Submit Application</h3>
+                    <p>Tell us about your organization, mission, and how we can collaborate to address water challenges.</p>
+                </div>
+                <div class="step">
+                    <i class="fas fa-handshake step-icon"></i>
+                    <h3>Partnership Review</h3>
+                    <p>Our team will evaluate alignment with AquaX goals and explore potential collaboration opportunities.</p>
+                </div>
+                <div class="step">
+                    <i class="fas fa-rocket step-icon"></i>
+                    <h3>Launch Projects</h3>
+                    <p>Once approved, we'll work together to design and implement impactful water conservation projects.</p>
+                </div>
+            </div>
+            
+            <button class="btn btn-primary" style="margin-top: 40px; padding: 15px 40px; font-size: 1.1rem;">
+                <i class="fas fa-file-alt"></i> Start Partnership Application
+            </button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <h3>AquaX</h3>
+                    <p>Creating sustainable water solutions through technology, innovation, and strategic partnerships with NGOs worldwide.</p>
+                    <div style="display: flex; gap: 15px;">
+                        <a href="#" style="color: white;"><i class="fab fa-twitter fa-lg"></i></a>
+                        <a href="#" style="color: white;"><i class="fab fa-facebook fa-lg"></i></a>
+                        <a href="#" style="color: white;"><i class="fab fa-linkedin fa-lg"></i></a>
+                        <a href="#" style="color: white;"><i class="fab fa-instagram fa-lg"></i></a>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#">Home</a></li>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">NGO Partners</a></li>
+                        <li><a href="#">Projects</a></li>
+                        <li><a href="#">Impact Reports</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="#">Water Conservation</a></li>
+                        <li><a href="#">Technology Solutions</a></li>
+                        <li><a href="#">Partnership Guidelines</a></li>
+                        <li><a href="#">Research Papers</a></li>
+                        <li><a href="#">Case Studies</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><a href="#">info@aquax.org</a></li>
+                        <li><a href="#">+1 (555) 123-4567</a></li>
+                        <li><a href="#">123 Water Street</a></li>
+                        <li><a href="#">Blue City, BC 12345</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2023 AquaX Water Conservation Initiative. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Simple JavaScript for filter buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    
+                    // In a real application, you would filter the NGO cards here
+                    // For this example, we'll just log the filter
+                    console.log(`Filtering by: ${this.textContent}`);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,811 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>AquaX — Live Water Map</title>
+  <link rel="stylesheet" href="styles/base.css"/>
+  <link rel="stylesheet" href="styles/map.css"/>
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">💧</div>
+      <span>AquaX — Live Water Map</span>
+    </div>
+    <nav class="nav">
+      <a href="index.html" class="nav-link">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-text">Home</span>
+      </a>
+      <a href="citizen.html" class="nav-link">
+        <span class="nav-icon">👥</span>
+        <span class="nav-text">Report</span>
+      </a>
+      <a href="chat.html" class="nav-link">
+        <span class="nav-icon">🤖</span>
+        <span class="nav-text">Assistant</span>
+      </a>
+    </nav>
+    <div class="controls">
+      <button class="btn icon" onclick="toggleControls()" title="Toggle Controls">⚙️</button>
+      <select id="langSwitcher" class="lang-selector">
+        <option value="en">English</option>
+        <option value="hi">हिन्दी</option>
+        <option value="ta">தமிழ்</option>
+      </select>
+    </div>
+  </header>
+
+  <main class="map-container">
+    <!-- Enhanced Map Controls -->
+    <div id="mapControls" class="map-controls active">
+      <!-- Quick Actions -->
+      <div class="control-section">
+        <h3>📍 Quick Actions</h3>
+        <div class="control-group">
+          <button class="btn control-btn primary" onclick="centerOnKarunya()">
+            <span class="btn-icon">🏫</span>
+            <span class="btn-text">Karunya Campus</span>
+          </button>
+          <button class="btn control-btn accent" onclick="centerOnUser()">
+            <span class="btn-icon">🎯</span>
+            <span class="btn-text">My Location</span>
+          </button>
+          <button class="btn control-btn success" onclick="addSampleIssue()">
+            <span class="btn-icon">➕</span>
+            <span class="btn-text">Add Issue</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Map Layers -->
+      <div class="control-section">
+        <h3>🗺️ Map Layers</h3>
+        <div class="control-group">
+          <button class="btn control-btn" onclick="changeMapStyle('standard')" id="btnStandard">
+            <span class="btn-icon">🗺️</span>
+            <span class="btn-text">Standard</span>
+          </button>
+          <button class="btn control-btn" onclick="changeMapStyle('satellite')" id="btnSatellite">
+            <span class="btn-icon">🛰️</span>
+            <span class="btn-text">Satellite</span>
+          </button>
+          <button class="btn control-btn" onclick="changeMapStyle('dark')" id="btnDark">
+            <span class="btn-icon">🌙</span>
+            <span class="btn-text">Dark Mode</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Issue Filters -->
+      <div class="control-section">
+        <h3>🔍 Issue Filters</h3>
+        <div class="filter-group">
+          <label class="filter-option">
+            <input type="checkbox" checked onchange="toggleIssueType('leak')">
+            <span class="filter-indicator leak"></span>
+            <span>Water Leaks</span>
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" checked onchange="toggleIssueType('contamination')">
+            <span class="filter-indicator contamination"></span>
+            <span>Contamination</span>
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" checked onchange="toggleIssueType('low_pressure')">
+            <span class="filter-indicator low-pressure"></span>
+            <span>Low Pressure</span>
+          </label>
+          <label class="filter-option">
+            <input type="checkbox" checked onchange="toggleIssueType('maintenance')">
+            <span class="filter-indicator maintenance"></span>
+            <span>Maintenance</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Water Infrastructure -->
+      <div class="control-section">
+        <h3>🏗️ Infrastructure</h3>
+        <div class="toggle-group">
+          <label class="toggle-option">
+            <input type="checkbox" checked onchange="toggleInfrastructure('tanks')">
+            <span class="toggle-slider"></span>
+            <span>Water Tanks</span>
+          </label>
+          <label class="toggle-option">
+            <input type="checkbox" checked onchange="toggleInfrastructure('treatment')">
+            <span class="toggle-slider"></span>
+            <span>Treatment Plants</span>
+          </label>
+          <label class="toggle-option">
+            <input type="checkbox" onchange="toggleInfrastructure('sensors')">
+            <span class="toggle-slider"></span>
+            <span>IoT Sensors</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Analytics -->
+      <div class="control-section">
+        <h3>📊 Analytics</h3>
+        <div class="control-group">
+          <button class="btn control-btn info" onclick="showHeatmap()">
+            <span class="btn-icon">🔥</span>
+            <span class="btn-text">Heatmap</span>
+          </button>
+          <button class="btn control-btn warning" onclick="showStatistics()">
+            <span class="btn-icon">📈</span>
+            <span class="btn-text">Statistics</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Map Container -->
+    <div id="map"></div>
+
+    <!-- Bottom Status Bar -->
+    <div class="status-bar">
+      <div class="status-items">
+        <div class="status-item">
+          <span class="status-icon">💧</span>
+          <span class="status-label">Active Issues:</span>
+          <span class="status-value" id="activeIssues">0</span>
+        </div>
+        <div class="status-item">
+          <span class="status-icon">🏭</span>
+          <span class="status-label">Infrastructure:</span>
+          <span class="status-value" id="infrastructureCount">4</span>
+        </div>
+        <div class="status-item">
+          <span class="status-icon">📍</span>
+          <span class="status-label">Location:</span>
+          <span class="status-value" id="locationInfo">Karunya Campus</span>
+        </div>
+        <div class="status-item">
+          <span class="status-icon">⏱️</span>
+          <span class="status-label">Updated:</span>
+          <span class="status-value" id="lastUpdate">Just now</span>
+        </div>
+      </div>
+      <div class="status-actions">
+        <button class="btn small" onclick="refreshData()" title="Refresh">
+          <span class="btn-icon">🔄</span>
+        </button>
+        <button class="btn small" onclick="exportData()" title="Export">
+          <span class="btn-icon">📤</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Quick Report Panel -->
+    <div id="reportPanel" class="report-panel">
+      <div class="panel-header">
+        <h3>📝 Report Water Issue</h3>
+        <button class="btn icon" onclick="closeReportPanel()">✕</button>
+      </div>
+      <div class="panel-content">
+        <div class="form-group">
+          <label>Issue Type</label>
+          <select id="issueType" class="form-select">
+            <option value="leak">💧 Water Leak</option>
+            <option value="contamination">🤢 Contamination</option>
+            <option value="low_pressure">💦 Low Pressure</option>
+            <option value="no_water">🚱 No Water</option>
+            <option value="maintenance">🔧 Maintenance</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Severity Level</label>
+          <div class="severity-options">
+            <label class="severity-option">
+              <input type="radio" name="severity" value="low">
+              <span class="severity-dot low"></span>
+              <span>Low</span>
+            </label>
+            <label class="severity-option">
+              <input type="radio" name="severity" value="medium" checked>
+              <span class="severity-dot medium"></span>
+              <span>Medium</span>
+            </label>
+            <label class="severity-option">
+              <input type="radio" name="severity" value="high">
+              <span class="severity-dot high"></span>
+              <span>High</span>
+            </label>
+            <label class="severity-option">
+              <input type="radio" name="severity" value="critical">
+              <span class="severity-dot critical"></span>
+              <span>Critical</span>
+            </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="issueDescription" placeholder="Describe the water issue..." rows="3"></textarea>
+        </div>
+        <div class="form-actions">
+          <button class="btn primary" onclick="submitReport()">Submit Report</button>
+          <button class="btn outline" onclick="closeReportPanel()">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistics Panel -->
+    <div id="statsPanel" class="stats-panel">
+      <div class="panel-header">
+        <h3>📊 Water Analytics</h3>
+        <button class="btn icon" onclick="closeStatsPanel()">✕</button>
+      </div>
+      <div class="panel-content">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">💧</div>
+            <div class="stat-value" id="totalReports">12</div>
+            <div class="stat-label">Total Reports</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🚨</div>
+            <div class="stat-value" id="criticalIssues">3</div>
+            <div class="stat-label">Critical Issues</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-value" id="resolvedIssues">8</div>
+            <div class="stat-label">Resolved</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">⏱️</div>
+            <div class="stat-value" id="avgResponse">2.5h</div>
+            <div class="stat-label">Avg Response</div>
+          </div>
+        </div>
+        <div class="chart-placeholder">
+          <div class="chart-icon">📈</div>
+          <p>Issue Trend Analysis</p>
+          <small>Weekly report data visualization</small>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Leaflet JavaScript -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <script>
+    // Enhanced Map Implementation
+    let map;
+    let markers = [];
+    let infrastructureMarkers = [];
+    let issueMarkers = [];
+    let currentMapStyle = 'standard';
+    let karunyaLocation = [10.9315, 76.9793];
+    let activeFilters = ['leak', 'contamination', 'low_pressure', 'maintenance'];
+    let visibleInfrastructure = ['tanks', 'treatment'];
+
+    // Map style configurations
+    const mapStyles = {
+      standard: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      satellite: 'https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+      dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+    };
+
+    // Initialize map when page loads
+    function initMap() {
+      console.log('Initializing Enhanced Karunya University Map...');
+      
+      // Create map centered on Karunya University
+      map = L.map('map').setView(karunyaLocation, 16);
+      
+      // Add initial tile layer
+      L.tileLayer(mapStyles.standard, {
+        attribution: '&copy; OpenStreetMap contributors',
+        maxZoom: 19,
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+      }).addTo(map);
+      
+      // Add Karunya University main marker
+      addKarunyaMarker();
+      
+      // Add water infrastructure
+      addWaterInfrastructure();
+      
+      // Add sample issues
+      addSampleIssues();
+      
+      // Setup map events
+      setupMapEvents();
+      
+      console.log('Enhanced map initialized successfully!');
+      updateStatus();
+    }
+
+    function addKarunyaMarker() {
+      const karunyaMarker = L.marker(karunyaLocation)
+        .addTo(map)
+        .bindPopup(`
+          <div style="text-align: center; min-width: 250px;">
+            <h3>🏫 Karunya University</h3>
+            <p><strong>Water Management Command Center</strong></p>
+            <p>Coimbatore, Tamil Nadu - 641114</p>
+            <div style="background: #e3f2fd; padding: 10px; border-radius: 5px; margin: 10px 0;">
+              <strong>📞 Emergency: 1066</strong><br>
+              <strong>💧 Water Helpline: 1800-XXX-XXXX</strong>
+            </div>
+            <small>AquaX Smart Water Monitoring System</small>
+          </div>
+        `)
+        .openPopup();
+      
+      markers.push(karunyaMarker);
+    }
+
+    function addWaterInfrastructure() {
+      const infrastructure = [
+        {
+          coords: [10.9320, 76.9785],
+          type: 'tanks',
+          name: 'Main Water Tank - 5000L',
+          icon: '💧',
+          description: 'Primary storage - Supplies entire campus',
+          status: 'operational'
+        },
+        {
+          coords: [10.9308, 76.9801],
+          type: 'treatment',
+          name: 'Water Treatment Plant',
+          icon: '🏭',
+          description: 'RO Filtration & Purification System',
+          status: 'operational'
+        },
+        {
+          coords: [10.9318, 76.9798],
+          type: 'tanks',
+          name: 'Hostel Supply Tank - 3000L',
+          icon: '💧',
+          description: 'Boys & Girls Hostel water supply',
+          status: 'operational'
+        },
+        {
+          coords: [10.9312, 76.9789],
+          type: 'tanks',
+          name: 'Academic Block Tank',
+          icon: '💧',
+          description: 'Main building complex supply',
+          status: 'maintenance'
+        },
+        {
+          coords: [10.9316, 76.9792],
+          type: 'treatment',
+          name: 'Water Testing Lab',
+          icon: '🔬',
+          description: 'Quality testing and monitoring',
+          status: 'operational'
+        }
+      ];
+
+      infrastructure.forEach(item => {
+        const statusColor = item.status === 'operational' ? 'green' : 'orange';
+        const marker = L.marker(item.coords)
+          .addTo(map)
+          .bindPopup(`
+            <div style="text-align: center; min-width: 200px;">
+              <div style="font-size: 24px;">${item.icon}</div>
+              <h4>${item.name}</h4>
+              <p>${item.description}</p>
+              <div style="background: ${statusColor}; color: white; padding: 5px; border-radius: 5px; margin: 5px 0;">
+                Status: ${item.status.toUpperCase()}
+              </div>
+              <small>Last checked: Today</small>
+            </div>
+          `);
+        
+        infrastructureMarkers.push(marker);
+        markers.push(marker);
+      });
+    }
+
+    function addSampleIssues() {
+      const issues = [
+        {
+          coords: [10.9310, 76.9790],
+          type: 'leak',
+          description: 'Pipe leakage near main administrative building',
+          severity: 'high',
+          timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000) // 2 hours ago
+        },
+        {
+          coords: [10.9315, 76.9788],
+          type: 'low_pressure',
+          description: 'Low water pressure reported in Block B hostel',
+          severity: 'medium',
+          timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000) // 5 hours ago
+        },
+        {
+          coords: [10.9322, 76.9795],
+          type: 'contamination',
+          description: 'Water discoloration reported in cafeteria area',
+          severity: 'critical',
+          timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000) // 1 hour ago
+        },
+        {
+          coords: [10.9309, 76.9793],
+          type: 'maintenance',
+          description: 'Scheduled maintenance - Water supply interruption',
+          severity: 'low',
+          timestamp: new Date(Date.now() - 30 * 60 * 1000) // 30 minutes ago
+        }
+      ];
+
+      issues.forEach(issue => {
+        addIssueMarker(issue);
+      });
+    }
+
+    function addIssueMarker(issue) {
+      const issueIcons = {
+        leak: '💧',
+        contamination: '🤢',
+        low_pressure: '💦',
+        no_water: '🚱',
+        maintenance: '🔧'
+      };
+
+      const severityColors = {
+        low: '#00cc66',
+        medium: '#ff9900',
+        high: '#ff3333',
+        critical: '#cc0000'
+      };
+
+      const marker = L.marker(issue.coords)
+        .addTo(map)
+        .bindPopup(`
+          <div style="text-align: center; min-width: 250px;">
+            <div style="font-size: 28px;">${issueIcons[issue.type]}</div>
+            <h4 style="color: ${severityColors[issue.severity]};">${issue.type.replace('_', ' ').toUpperCase()}</h4>
+            <p>${issue.description}</p>
+            <div style="background: ${severityColors[issue.severity]}; color: white; padding: 8px; border-radius: 5px; margin: 8px 0;">
+              <strong>Severity: ${issue.severity.toUpperCase()}</strong>
+            </div>
+            <div style="background: #f8f9fa; padding: 5px; border-radius: 3px; color: #666;">
+              Reported: ${formatTime(issue.timestamp)}
+            </div>
+            <div style="margin-top: 10px;">
+              <button onclick="resolveIssue(${issueMarkers.length})" style="background: #00cc66; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; margin: 2px;">
+                ✅ Resolve
+              </button>
+              <button onclick="escalateIssue(${issueMarkers.length})" style="background: #ff9900; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; margin: 2px;">
+                🚨 Escalate
+              </button>
+            </div>
+          </div>
+        `);
+
+      issueMarkers.push({ marker, issue });
+      markers.push(marker);
+    }
+
+    function formatTime(timestamp) {
+      const now = new Date();
+      const diff = now - timestamp;
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      
+      if (hours > 0) return `${hours}h ${minutes}m ago`;
+      return `${minutes}m ago`;
+    }
+
+    // Control Functions
+    function centerOnKarunya() {
+      map.setView(karunyaLocation, 16);
+      showNotification('📍 Centered on Karunya University Campus');
+      updateLocationInfo('Karunya Campus Center');
+    }
+
+    function centerOnUser() {
+      if (!navigator.geolocation) {
+        showNotification('❌ Geolocation not supported by your browser');
+        return;
+      }
+
+      showNotification('🎯 Locating your position...');
+      
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const userLocation = [
+            position.coords.latitude,
+            position.coords.longitude
+          ];
+          
+          map.setView(userLocation, 16);
+          
+          // Add user location marker
+          const userMarker = L.marker(userLocation)
+            .addTo(map)
+            .bindPopup(`
+              <div style="text-align: center;">
+                <h3>📍 Your Current Location</h3>
+                <p>You are here on campus!</p>
+                <small>Accuracy: ${position.coords.accuracy}m</small>
+              </div>
+            `);
+          
+          markers.push(userMarker);
+          updateLocationInfo('Your Location');
+          showNotification('✅ Located your position on campus');
+        },
+        (error) => {
+          console.error('Geolocation error:', error);
+          showNotification('❌ Could not get your location. Using Karunya University.');
+          centerOnKarunya();
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 60000
+        }
+      );
+    }
+
+    function changeMapStyle(style) {
+      currentMapStyle = style;
+      
+      // Remove existing tile layers
+      map.eachLayer(layer => {
+        if (layer instanceof L.TileLayer) {
+          map.removeLayer(layer);
+        }
+      });
+
+      // Add new tile layer
+      L.tileLayer(mapStyles[style], {
+        attribution: '&copy; Map contributors',
+        maxZoom: 19,
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+      }).addTo(map);
+
+      // Re-add all markers
+      markers.forEach(marker => {
+        marker.addTo(map);
+      });
+
+      // Update button states
+      document.querySelectorAll('.control-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.getElementById(`btn${style.charAt(0).toUpperCase() + style.slice(1)}`).classList.add('active');
+
+      showNotification(`🗺️ Switched to ${style} map view`);
+    }
+
+    function toggleControls() {
+      const controls = document.getElementById('mapControls');
+      controls.classList.toggle('active');
+      showNotification(controls.classList.contains('active') ? '⚙️ Controls shown' : '⚙️ Controls hidden');
+    }
+
+    function toggleIssueType(type) {
+      const index = activeFilters.indexOf(type);
+      if (index > -1) {
+        activeFilters.splice(index, 1);
+      } else {
+        activeFilters.push(type);
+      }
+      updateIssueVisibility();
+      showNotification(`🔍 ${type} issues ${index > -1 ? 'hidden' : 'shown'}`);
+    }
+
+    function toggleInfrastructure(type) {
+      const index = visibleInfrastructure.indexOf(type);
+      if (index > -1) {
+        visibleInfrastructure.splice(index, 1);
+      } else {
+        visibleInfrastructure.push(type);
+      }
+      updateInfrastructureVisibility();
+      showNotification(`🏗️ ${type} ${index > -1 ? 'hidden' : 'shown'}`);
+    }
+
+    function updateIssueVisibility() {
+      // Implementation for showing/hiding issues based on filters
+      console.log('Active filters:', activeFilters);
+    }
+
+    function updateInfrastructureVisibility() {
+      // Implementation for showing/hiding infrastructure
+      console.log('Visible infrastructure:', visibleInfrastructure);
+    }
+
+    function showHeatmap() {
+      showNotification('🔥 Heatmap feature coming soon...');
+    }
+
+    function showStatistics() {
+      document.getElementById('statsPanel').classList.add('active');
+    }
+
+    function closeStatsPanel() {
+      document.getElementById('statsPanel').classList.remove('active');
+    }
+
+    function openReportPanel() {
+      document.getElementById('reportPanel').classList.add('active');
+    }
+
+    function closeReportPanel() {
+      document.getElementById('reportPanel').classList.remove('active');
+    }
+
+    function submitReport() {
+      const issueType = document.getElementById('issueType').value;
+      const severity = document.querySelector('input[name="severity"]:checked').value;
+      const description = document.getElementById('issueDescription').value;
+
+      if (!description.trim()) {
+        showNotification('❌ Please enter a description');
+        return;
+      }
+
+      // Create new issue
+      const newIssue = {
+        coords: map.getCenter(),
+        type: issueType,
+        description: description,
+        severity: severity,
+        timestamp: new Date()
+      };
+
+      addIssueMarker(newIssue);
+      closeReportPanel();
+      updateStatus();
+      showNotification('✅ Water issue reported successfully!');
+
+      // Reset form
+      document.getElementById('issueDescription').value = '';
+    }
+
+    function addSampleIssue() {
+      const issues = [
+        {
+          coords: [10.9313 + (Math.random() - 0.5) * 0.002, 76.9790 + (Math.random() - 0.5) * 0.002],
+          type: 'leak',
+          description: 'New pipe leakage detected',
+          severity: 'high'
+        },
+        {
+          coords: [10.9313 + (Math.random() - 0.5) * 0.002, 76.9790 + (Math.random() - 0.5) * 0.002],
+          type: 'low_pressure',
+          description: 'Water pressure drop reported',
+          severity: 'medium'
+        }
+      ];
+
+      const randomIssue = issues[Math.floor(Math.random() * issues.length)];
+      randomIssue.timestamp = new Date();
+      
+      addIssueMarker(randomIssue);
+      updateStatus();
+      showNotification('📝 Added sample water issue report');
+    }
+
+    function resolveIssue(index) {
+      if (issueMarkers[index]) {
+        map.removeLayer(issueMarkers[index].marker);
+        showNotification('✅ Issue marked as resolved');
+        updateStatus();
+      }
+    }
+
+    function escalateIssue(index) {
+      showNotification('🚨 Issue escalated to emergency team');
+    }
+
+    function refreshData() {
+      showNotification('🔄 Refreshing water data...');
+      setTimeout(() => {
+        updateStatus();
+        showNotification('✅ Data refreshed successfully');
+      }, 1000);
+    }
+
+    function exportData() {
+      showNotification('📤 Exporting map data...');
+    }
+
+    function updateStatus() {
+      const activeIssues = issueMarkers.length;
+      document.getElementById('activeIssues').textContent = activeIssues;
+      document.getElementById('infrastructureCount').textContent = infrastructureMarkers.length;
+      document.getElementById('totalReports').textContent = activeIssues + 8; // Sample data
+      document.getElementById('criticalIssues').textContent = issueMarkers.filter(im => im.issue.severity === 'critical').length;
+      document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+    }
+
+    function updateLocationInfo(location) {
+      document.getElementById('locationInfo').textContent = location;
+    }
+
+    function setupMapEvents() {
+      // Map click event for adding reports
+      map.on('click', function(e) {
+        // You can enable this to add reports on map click
+        // console.log('Map clicked at:', e.latlng);
+      });
+
+      // Map move event
+      map.on('moveend', function() {
+        const center = map.getCenter();
+        updateLocationInfo(`Lat: ${center.lat.toFixed(4)}, Lng: ${center.lng.toFixed(4)}`);
+      });
+    }
+
+    function showNotification(message) {
+      const notification = document.createElement('div');
+      notification.className = 'map-notification';
+      notification.textContent = message;
+      notification.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 10px;
+        padding: 12px 18px;
+        color: var(--text-light);
+        z-index: 10000;
+        box-shadow: var(--glass-shadow);
+        animation: slideInRight 0.3s ease;
+        max-width: 300px;
+      `;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.style.animation = 'slideOutRight 0.3s ease';
+          setTimeout(() => notification.remove(), 300);
+        }
+      }, 3000);
+    }
+
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      // Language switcher
+      const langSwitcher = document.getElementById('langSwitcher');
+      if (langSwitcher) {
+        langSwitcher.value = localStorage.getItem('ax_lang') || 'en';
+        langSwitcher.addEventListener('change', (e) => {
+          localStorage.setItem('ax_lang', e.target.value);
+          showNotification(`🌐 Language changed to ${e.target.value}`);
+        });
+      }
+
+      // Initialize map
+      initMap();
+
+      // Set default map style button as active
+      document.getElementById('btnStandard').classList.add('active');
+    });
+
+    // Add CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideInRight {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+      @keyframes slideOutRight {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>

@@ -1,0 +1,1151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>AquaX — AI Assistant</title>
+  <link rel="stylesheet" href="styles/base.css"/>
+  <link rel="stylesheet" href="styles/chat.css"/>
+  <script src="/socket.io/socket.io.js"></script>
+  <script defer src="scripts/voice.js"></script>
+  <script defer src="scripts/lang.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">💧</div>
+      <span>AquaX — AI Assistant</span>
+    </div>
+    <nav class="nav">
+      <a href="index.html" class="nav-link">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-text">Home</span>
+      </a>
+      <a href="citizen.html" class="nav-link">
+        <span class="nav-icon">👥</span>
+        <span class="nav-text">Report</span>
+      </a>
+      <a href="map.html" class="nav-link">
+        <span class="nav-icon">🗺️</span>
+        <span class="nav-text">Map</span>
+      </a>
+    </nav>
+    <div class="controls">
+      <button id="voiceControl" class="btn icon" aria-label="Voice Control">🎤</button>
+      <select id="langSwitcher" class="lang-selector">
+        <option value="en">English</option>
+        <option value="hi">हिन्दी</option>
+        <option value="ta">தமிழ்</option>
+        <option value="te">తెలుగు</option>
+        <option value="kn">ಕನ್ನಡ</option>
+        <option value="ml">മലയാളം</option>
+      </select>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="chat-layout">
+      <!-- Sidebar with Quick Actions -->
+      <div class="chat-sidebar">
+        <div class="sidebar-header">
+          <h3>💧 Quick Help</h3>
+          <p>Get instant water-related assistance</p>
+        </div>
+
+        <div class="quick-actions">
+          <div class="action-category">
+            <h4>🚨 Emergency Help</h4>
+            <button class="quick-btn emergency" onclick="askEmergency()">
+              <span class="btn-icon">🆘</span>
+              <span class="btn-text">Water Emergency</span>
+            </button>
+            <button class="quick-btn" onclick="askSOS()">
+              <span class="btn-icon">🚨</span>
+              <span class="btn-text">SOS Guidelines</span>
+            </button>
+          </div>
+
+          <div class="action-category">
+            <h4>💧 Water Quality</h4>
+            <button class="quick-btn" onclick="askWaterSafety()">
+              <span class="btn-icon">🔍</span>
+              <span class="btn-text">Check Water Safety</span>
+            </button>
+            <button class="quick-btn" onclick="askPurification()">
+              <span class="btn-icon">💊</span>
+              <span class="btn-text">Purification Methods</span>
+            </button>
+            <button class="quick-btn" onclick="askContamination()">
+              <span class="btn-icon">🤢</span>
+              <span class="btn-text">Contamination Signs</span>
+            </button>
+          </div>
+
+          <div class="action-category">
+            <h4>🔧 Maintenance</h4>
+            <button class="quick-btn" onclick="askLeakRepair()">
+              <span class="btn-icon">🔧</span>
+              <span class="btn-text">Fix Water Leaks</span>
+            </button>
+            <button class="quick-btn" onclick="askLowPressure()">
+              <span class="btn-icon">💦</span>
+              <span class="btn-text">Low Pressure Solutions</span>
+            </button>
+            <button class="quick-btn" onclick="askTankerInfo()">
+              <span class="btn-icon">🚚</span>
+              <span class="btn-text">Tanker Schedule</span>
+            </button>
+          </div>
+
+          <div class="action-category">
+            <h4>📚 Education</h4>
+            <button class="quick-btn" onclick="askConservation()">
+              <span class="btn-icon">💧</span>
+              <span class="btn-text">Water Conservation</span>
+            </button>
+            <button class="quick-btn" onclick="askHealthTips()">
+              <span class="btn-icon">❤️</span>
+              <span class="btn-text">Health & Safety</span>
+            </button>
+            <button class="quick-btn" onclick="askRainwater()">
+              <span class="btn-icon">🌧️</span>
+              <span class="btn-text">Rainwater Harvesting</span>
+            </button>
+          </div>
+
+          <div class="action-category">
+            <h4>🏫 Campus Info</h4>
+            <button class="quick-btn" onclick="askCampusWater()">
+              <span class="btn-icon">🏫</span>
+              <span class="btn-text">Campus Water Supply</span>
+            </button>
+            <button class="quick-btn" onclick="askContactInfo()">
+              <span class="btn-icon">📞</span>
+              <span class="btn-text">Contact Authorities</span>
+            </button>
+            <button class="quick-btn" onclick="askLaundryInfo()">
+              <span class="btn-icon">👕</span>
+              <span class="btn-text">Laundry Services</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="emergency-contacts">
+          <h4>🆘 Emergency Contacts</h4>
+          <div class="contact-item">
+            <strong>Campus Security</strong>
+            <span>1066</span>
+          </div>
+          <div class="contact-item">
+            <strong>Water Emergency</strong>
+            <span>1800-XXX-XXXX</span>
+          </div>
+          <div class="contact-item">
+            <strong>Medical Emergency</strong>
+            <span>108</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Chat Area -->
+      <div class="chat-main">
+        <!-- Chat Header -->
+        <div class="chat-header">
+          <div class="ai-profile">
+            <div class="ai-avatar">🤖</div>
+            <div class="ai-info">
+              <h3>AquaX AI Assistant</h3>
+              <div class="ai-status">
+                <span class="status-dot online"></span>
+                <span>Online - Ready to help with water issues</span>
+              </div>
+            </div>
+          </div>
+          <div class="chat-actions">
+            <button class="btn icon" onclick="clearChat()" title="Clear Chat">
+              🗑️
+            </button>
+            <button class="btn icon" onclick="toggleTheme()" title="Toggle Theme">
+              🌙
+            </button>
+            <button class="btn icon" onclick="exportChat()" title="Export Chat">
+              📤
+            </button>
+          </div>
+        </div>
+
+        <!-- Chat Messages -->
+        <div class="chat-messages" id="chatMessages">
+          <!-- Welcome Message -->
+          <div class="message ai-message">
+            <div class="message-avatar">🤖</div>
+            <div class="message-content">
+              <div class="message-bubble">
+                <h4>Welcome to AquaX AI Assistant! 💧</h4>
+                <p>I'm here to help you with all water-related issues at Karunya University. I can assist with:</p>
+                <ul>
+                  <li>🚨 Emergency water situations</li>
+                  <li>💧 Water quality and safety</li>
+                  <li>🔧 Maintenance and repairs</li>
+                  <li>🏫 Campus water information</li>
+                  <li>📚 Water conservation tips</li>
+                </ul>
+                <p>How can I help you today? You can type your question or use the quick buttons on the left!</p>
+              </div>
+              <div class="message-time">Just now</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat Input -->
+        <div class="chat-input-container">
+          <div class="input-actions">
+            <button class="btn icon" onclick="attachFile()" title="Attach File">
+              📎
+            </button>
+            <button class="btn icon" onclick="sendLocation()" title="Send Location">
+              📍
+            </button>
+            <button class="btn icon" onclick="showQuickReplies()" title="Quick Replies">
+              💬
+            </button>
+          </div>
+          
+          <div class="chat-input-wrapper">
+            <textarea 
+              id="chatInput" 
+              placeholder="Ask me about water safety, report issues, or get help... (Press Enter to send, Shift+Enter for new line)"
+              rows="1"
+            ></textarea>
+            <button class="btn send-btn" onclick="sendMessage()">
+              <span class="send-icon">📤</span>
+            </button>
+          </div>
+
+          <div class="voice-control">
+            <button class="btn voice-btn" id="voiceChatBtn" onclick="toggleVoiceInput()">
+              <span class="voice-icon">🎤</span>
+              <span class="voice-text">Voice Input</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Typing Indicator -->
+        <div class="typing-indicator" id="typingIndicator">
+          <div class="typing-avatar">🤖</div>
+          <div class="typing-content">
+            <div class="typing-bubble">
+              <div class="typing-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+              <span class="typing-text">AquaX AI is typing...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Voice Interface -->
+  <div id="voiceInterface" class="voice-interface hidden">
+    <div class="voice-modal">
+      <div class="voice-header">
+        <h3>🎤 Voice Assistant</h3>
+        <button class="btn icon" onclick="closeVoiceInterface()">✕</button>
+      </div>
+      <div class="voice-status">
+        <div class="pulse-ring"></div>
+        <div class="voice-icon">🎤</div>
+      </div>
+      <p class="voice-instruction" id="voiceInstruction">Click and speak about your water issue...</p>
+      <div class="voice-transcript">
+        <p id="voiceTranscript"></p>
+      </div>
+      <div class="voice-commands">
+        <p>Try saying:</p>
+        <ul>
+          <li>"How to purify drinking water?"</li>
+          <li>"Report a water leak in my hostel"</li>
+          <li>"What are signs of water contamination?"</li>
+          <li>"Emergency water contact numbers"</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Replies Modal -->
+  <div id="quickRepliesModal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>💬 Quick Responses</h3>
+        <button class="btn icon" onclick="closeQuickReplies()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="quick-replies-grid">
+          <button class="quick-reply-btn" onclick="insertQuickReply('How do I check if my water is safe to drink?')">
+            💧 Water Safety Check
+          </button>
+          <button class="quick-reply-btn" onclick="insertQuickReply('What should I do during a water outage?')">
+            🚰 Water Outage Help
+          </button>
+          <button class="quick-reply-btn" onclick="insertQuickReply('How to report a water leak?')">
+            🔧 Report Water Leak
+          </button>
+          <button class="quick-reply-btn" onclick="insertQuickReply('What are emergency water contacts?')">
+            🆘 Emergency Contacts
+          </button>
+          <button class="quick-reply-btn" onclick="insertQuickReply('How to conserve water in hostel?')">
+            💧 Water Conservation
+          </button>
+          <button class="quick-reply-btn" onclick="insertQuickReply('What are signs of water contamination?')">
+            🤢 Contamination Signs
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <span>AquaX AI Assistant • 24/7 Water Help • Multilingual Support</span>
+      <span>Powered by Google AI • Real-time Water Management</span>
+    </div>
+  </footer>
+
+  <script>
+    // Chat Management System
+    class ChatManager {
+      constructor() {
+        this.messages = [];
+        this.isTyping = false;
+        this.currentLanguage = localStorage.getItem('ax_lang') || 'en';
+        this.socket = io();
+        this.setupEventListeners();
+        this.loadChatHistory();
+      }
+
+      setupEventListeners() {
+        // Enter key to send message
+        const chatInput = document.getElementById('chatInput');
+        chatInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            this.sendMessage();
+          }
+        });
+
+        // Auto-resize textarea
+        chatInput.addEventListener('input', this.autoResizeTextarea);
+
+        // Socket events
+        this.socket.on('connect', () => {
+          this.addSystemMessage('Connected to AquaX AI', 'success');
+        });
+
+        this.socket.on('disconnect', () => {
+          this.addSystemMessage('Disconnected from server', 'error');
+        });
+      }
+
+      autoResizeTextarea() {
+        const textarea = document.getElementById('chatInput');
+        textarea.style.height = 'auto';
+        textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+      }
+
+      async sendMessage() {
+        const input = document.getElementById('chatInput');
+        const message = input.value.trim();
+        
+        if (!message) return;
+
+        // Add user message
+        this.addUserMessage(message);
+        input.value = '';
+        this.autoResizeTextarea();
+
+        // Show typing indicator
+        this.showTypingIndicator();
+
+        try {
+          // Send to backend
+          const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              message: message,
+              language: this.currentLanguage
+            })
+          });
+
+          const data = await response.json();
+          
+          // Hide typing indicator
+          this.hideTypingIndicator();
+
+          // Add AI response
+          this.addAIMessage(data.reply || 'I apologize, but I encountered an error. Please try again.');
+
+          // Speak response if voice is enabled
+          if (window.speak && localStorage.getItem('voiceEnabled') === 'true') {
+            window.speak(data.reply);
+          }
+
+        } catch (error) {
+          console.error('Chat error:', error);
+          this.hideTypingIndicator();
+          this.addAIMessage('I\'m currently experiencing technical difficulties. Please try again in a moment or contact water authorities directly for urgent issues.');
+        }
+      }
+
+      addUserMessage(message) {
+        const messageObj = {
+          type: 'user',
+          content: message,
+          timestamp: new Date()
+        };
+        
+        this.messages.push(messageObj);
+        this.renderMessage(messageObj);
+        this.saveChatHistory();
+        this.scrollToBottom();
+      }
+
+      addAIMessage(message) {
+        const messageObj = {
+          type: 'ai',
+          content: message,
+          timestamp: new Date()
+        };
+        
+        this.messages.push(messageObj);
+        this.renderMessage(messageObj);
+        this.saveChatHistory();
+        this.scrollToBottom();
+      }
+
+      addSystemMessage(message, type = 'info') {
+        const messageObj = {
+          type: 'system',
+          content: message,
+          timestamp: new Date(),
+          messageType: type
+        };
+        
+        this.messages.push(messageObj);
+        this.renderMessage(messageObj);
+        this.saveChatHistory();
+        this.scrollToBottom();
+      }
+
+      renderMessage(messageObj) {
+        const messagesContainer = document.getElementById('chatMessages');
+        
+        const messageElement = document.createElement('div');
+        messageElement.className = `message ${messageObj.type}-message`;
+        
+        if (messageObj.type === 'system') {
+          messageElement.innerHTML = `
+            <div class="system-message ${messageObj.messageType}">
+              <span class="system-icon">ℹ️</span>
+              <span>${messageObj.content}</span>
+              <span class="message-time">${this.formatTime(messageObj.timestamp)}</span>
+            </div>
+          `;
+        } else {
+          const avatar = messageObj.type === 'user' ? '👤' : '🤖';
+          const bubbleClass = messageObj.type === 'user' ? 'user-bubble' : 'ai-bubble';
+          
+          messageElement.innerHTML = `
+            <div class="message-avatar">${avatar}</div>
+            <div class="message-content">
+              <div class="message-bubble ${bubbleClass}">
+                ${this.formatMessageContent(messageObj.content)}
+              </div>
+              <div class="message-time">${this.formatTime(messageObj.timestamp)}</div>
+            </div>
+          `;
+        }
+        
+        messagesContainer.appendChild(messageElement);
+      }
+
+      formatMessageContent(content) {
+        // Convert line breaks to <br>
+        content = content.replace(/\n/g, '<br>');
+        
+        // Format lists
+        content = content.replace(/\* (.*?)(?=\n|$)/g, '<li>$1</li>');
+        content = content.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+        
+        return content;
+      }
+
+      formatTime(timestamp) {
+        const now = new Date();
+        const messageTime = new Date(timestamp);
+        const diff = now - messageTime;
+        const minutes = Math.floor(diff / 60000);
+        const hours = Math.floor(diff / 3600000);
+        
+        if (minutes < 1) return 'Just now';
+        if (minutes < 60) return `${minutes}m ago`;
+        if (hours < 24) return `${hours}h ago`;
+        return messageTime.toLocaleTimeString();
+      }
+
+      showTypingIndicator() {
+        this.isTyping = true;
+        document.getElementById('typingIndicator').style.display = 'flex';
+        this.scrollToBottom();
+      }
+
+      hideTypingIndicator() {
+        this.isTyping = false;
+        document.getElementById('typingIndicator').style.display = 'none';
+      }
+
+      scrollToBottom() {
+        const messagesContainer = document.getElementById('chatMessages');
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+
+      saveChatHistory() {
+        localStorage.setItem('aquax_chat_history', JSON.stringify(this.messages));
+      }
+
+      loadChatHistory() {
+        const saved = localStorage.getItem('aquax_chat_history');
+        if (saved) {
+          this.messages = JSON.parse(saved);
+          this.messages.forEach(msg => this.renderMessage(msg));
+          this.scrollToBottom();
+        }
+      }
+
+      clearChat() {
+        if (confirm('Are you sure you want to clear the chat history?')) {
+          this.messages = [];
+          document.getElementById('chatMessages').innerHTML = '';
+          localStorage.removeItem('aquax_chat_history');
+          this.addSystemMessage('Chat history cleared', 'info');
+        }
+      }
+
+      exportChat() {
+        const chatText = this.messages.map(msg => {
+          const prefix = msg.type === 'user' ? 'You' : 'AquaX AI';
+          return `[${this.formatTime(msg.timestamp)}] ${prefix}: ${msg.content}`;
+        }).join('\n\n');
+        
+        const blob = new Blob([chatText], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `aquax-chat-${new Date().toISOString().split('T')[0]}.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
+        
+        this.addSystemMessage('Chat exported successfully', 'success');
+      }
+    }
+
+    // Global Functions
+    let chatManager;
+
+    function askEmergency() {
+      chatManager.addUserMessage('What should I do in a water emergency?');
+      chatManager.showTypingIndicator();
+      setTimeout(() => {
+        chatManager.hideTypingIndicator();
+        chatManager.addAIMessage(`🚨 **Water Emergency Guide**
+
+**Immediate Actions:**
+1. 🆘 Call Campus Security: **1066**
+2. 💧 Stop using contaminated water immediately
+3. 🏃 Evacuate if there's flooding or structural damage
+4. 📞 Contact Water Emergency: **1800-XXX-XXXX**
+
+**For Contamination:**
+- Don't drink, cook, or bathe with the water
+- Use bottled water for essential needs
+- Report symptoms of water-borne illnesses
+
+**For Flooding:**
+- Turn off electricity if safe to do so
+- Move to higher ground
+- Avoid walking through flood water
+
+**Emergency Kit Should Include:**
+- Bottled water (3-day supply)
+- Water purification tablets
+- First aid kit
+- Flashlight and batteries`);
+      }, 1000);
+    }
+
+    function askWaterSafety() {
+      chatManager.addUserMessage('How can I check if my water is safe to drink?');
+      // Simulate AI response
+      simulateAIResponse(`💧 **Water Safety Check Guide**
+
+**Visual Inspection:**
+- 👀 **Color:** Should be clear (not brown, yellow, or cloudy)
+- 👃 **Smell:** Should be odorless (no chlorine, sulfur, or chemical smells)
+- 💧 **Clarity:** No particles or sediment
+
+**Simple Home Tests:**
+1. **Glass Test:** Fill clear glass - check for particles after 1 hour
+2. **Smell Test:** Note any unusual odors at room temperature
+3. **Taste Test:** Small sip - should taste clean (spit out if suspicious)
+
+**Warning Signs:**
+- 🤢 Cloudy or discolored water
+- 👃 Strong chemical or rotten egg smell
+- 🎯 Metallic or bitter taste
+- 💦 Low pressure or air bubbles
+
+**At Karunya University:**
+- Water is tested weekly at treatment plant
+- Report concerns to hostel warden immediately
+- Use provided water purifiers in common areas
+
+**When in Doubt:**
+- Boil water for 1 minute before use
+- Use bottled water for drinking
+- Contact campus water department for testing`);
+    }
+
+    function askPurification() {
+      simulateAIResponse(`💊 **Water Purification Methods**
+
+**1. Boiling (Most Effective)**
+- ⏱️ Boil for 1 minute (3 minutes at high altitude)
+- 👍 Kills bacteria, viruses, parasites
+- 👎 Doesn't remove chemicals
+
+**2. Chlorination**
+- 🧪 Use household bleach (4-6% sodium hypochlorite)
+- 💧 Add 2 drops per liter, wait 30 minutes
+- 👃 Slight chlorine smell is normal
+
+**3. Water Purifiers**
+- 🏠 Use RO/UV filters in hostel common areas
+- 🔄 Replace filters as recommended
+- 🧹 Regular maintenance required
+
+**4. Portable Filters**
+- 🎒 Use for outdoor activities
+- 🦠 Check filter pore size (0.2 microns for bacteria)
+
+**Emergency Purification:**
+- ☀️ Solar disinfection (6 hours in direct sunlight)
+- 🧴 Commercial purification tablets
+- 🏔️ Natural filtration through clean sand
+
+**Campus Resources:**
+- Water treatment plant near main gate
+- RO plants in all hostels
+- Emergency purification tablets available at security`);
+    }
+
+    function askLeakRepair() {
+      simulateAIResponse(`🔧 **Water Leak Repair Guide**
+
+**Immediate Actions:**
+1. 🚰 Turn off main water supply
+2. 📞 Report to hostel maintenance: **EXT 1234**
+3. 🪣 Place buckets to collect water
+4. ⚡ Turn off electricity if near outlets
+
+**Temporary Fixes:**
+- **Pipe Leak:** Use rubber patch and hose clamp
+- **Faucet Leak:** Tighten with wrench or replace washer
+- **Joint Leak:** Apply waterproof tape
+
+**Campus Maintenance:**
+- 🛠️ 24/7 repair service available
+- ⏱️ Response time: 30 minutes for emergencies
+- 📋 Online reporting: aquax.edu.in/report
+
+**Prevention Tips:**
+- ❄️ Insulate pipes in winter
+- 🔧 Regular maintenance checks
+- 💧 Monitor water meter for hidden leaks
+
+**Emergency Contacts:**
+- 🏢 Maintenance Office: **EXT 1234**
+- 🚨 After Hours: **1066**
+- 📱 WhatsApp Reporting: **+91-XXXX-XXXXX**`);
+    }
+
+    function askCampusWater() {
+      simulateAIResponse(`🏫 **Karunya University Water System**
+
+**Water Sources:**
+- 🌊 Borewells: 5 operational wells across campus
+- 💧 Municipal Supply: Daily supply from Coimbatore Corporation
+- 🏞️ Storage: 8 overhead tanks (total capacity: 50,000 liters)
+
+**Distribution Schedule:**
+- 🕖 **Morning:** 6:00 AM - 9:00 AM
+- 🕛 **Afternoon:** 12:00 PM - 2:00 PM  
+- 🕖 **Evening:** 6:00 PM - 9:00 PM
+
+**Treatment Facilities:**
+- 🏭 Main Treatment Plant: Near Boys Hostel
+- 🔬 Water Testing Lab: Daily quality checks
+- 💊 RO Plants: All hostels and academic blocks
+
+**Water Quality:**
+- ✅ Weekly testing for 25 parameters
+- 📊 Real-time monitoring with IoT sensors
+- 🎯 99.8% compliance with WHO standards
+
+**Emergency Supply:**
+- 🚚 Backup tankers: 2 always on standby
+- 💦 Emergency storage: 10,000 liters
+- 🆘 24/7 emergency response team
+
+**Contact Information:**
+- 💧 Water Department: **EXT 5678**
+- 🚨 Emergencies: **1066**
+- 📧 Email: water@karunya.edu.in`);
+    }
+
+    function simulateAIResponse(message) {
+      chatManager.showTypingIndicator();
+      setTimeout(() => {
+        chatManager.hideTypingIndicator();
+        chatManager.addAIMessage(message);
+      }, 1500);
+    }
+
+    function sendMessage() {
+      chatManager.sendMessage();
+    }
+
+    function clearChat() {
+      chatManager.clearChat();
+    }
+
+    function exportChat() {
+      chatManager.exportChat();
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('dark-theme');
+      chatManager.addSystemMessage(
+        document.body.classList.contains('dark-theme') ? 
+        'Switched to dark theme' : 'Switched to light theme', 
+        'info'
+      );
+    }
+
+    function attachFile() {
+      chatManager.addSystemMessage('File attachment feature coming soon', 'info');
+    }
+
+    function sendLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            chatManager.addUserMessage(`My location: ${lat}, ${lng}`);
+            chatManager.addAIMessage(`📍 I see you're at coordinates ${lat.toFixed(6)}, ${lng.toFixed(6)}. How can I help with water issues at your location?`);
+          },
+          (error) => {
+            chatManager.addSystemMessage('Could not get your location', 'error');
+          }
+        );
+      }
+    }
+
+    function showQuickReplies() {
+      document.getElementById('quickRepliesModal').classList.remove('hidden');
+    }
+
+    function closeQuickReplies() {
+      document.getElementById('quickRepliesModal').classList.add('hidden');
+    }
+
+    function insertQuickReply(text) {
+      document.getElementById('chatInput').value = text;
+      closeQuickReplies();
+      document.getElementById('chatInput').focus();
+    }
+
+    function toggleVoiceInput() {
+      const voiceInterface = document.getElementById('voiceInterface');
+      if (voiceInterface.classList.contains('hidden')) {
+        voiceInterface.classList.remove('hidden');
+        startVoiceRecognition();
+      } else {
+        closeVoiceInterface();
+      }
+    }
+
+    function startVoiceRecognition() {
+      if (window.startListening) {
+        document.getElementById('voiceInstruction').textContent = 'Listening... Speak now!';
+        window.startListening((text) => {
+          document.getElementById('voiceTranscript').textContent = `You said: "${text}"`;
+          setTimeout(() => {
+            closeVoiceInterface();
+            chatManager.addUserMessage(text);
+            chatManager.sendMessage();
+          }, 1000);
+        });
+      } else {
+        chatManager.addSystemMessage('Voice recognition not available', 'error');
+        closeVoiceInterface();
+      }
+    }
+
+    function closeVoiceInterface() {
+      document.getElementById('voiceInterface').classList.add('hidden');
+      document.getElementById('voiceTranscript').textContent = '';
+      document.getElementById('voiceInstruction').textContent = 'Click and speak about your water issue...';
+    }
+
+    // Predefined question functions
+    function askSOS() { askEmergency(); }
+    function askContamination() { 
+      chatManager.addUserMessage('What are signs of water contamination?');
+      simulateAIResponse(`🤢 **Signs of Water Contamination**
+
+**Visual Signs:**
+- 🎨 Discoloration (brown, yellow, green, or cloudy)
+- 💧 Particles, sediment, or floating debris
+- 🌊 Unusual foam or bubbles
+- 🦠 Algae growth or slime
+
+**Smell Indicators:**
+- 🥚 Rotten egg smell (sulfur bacteria)
+- 🧪 Chemical or medicinal odor
+- 🗑️ Musty or earthy smell
+- 🍂 Decaying organic matter smell
+
+**Taste Warning Signs:**
+- 🧂 Salty or brackish taste
+- 🪙 Metallic or bitter flavor
+- 🧴 Chemical or plastic taste
+- 💊 Medicinal aftertaste
+
+**Health Symptoms:**
+- 🤢 Stomach cramps, nausea, diarrhea
+- 🤕 Headaches, dizziness, fatigue
+- 🩺 Skin rashes or irritation
+- 🌡️ Fever or flu-like symptoms
+
+**Immediate Actions:**
+1. 🚫 Stop using the water immediately
+2. 📞 Report to authorities: **1066**
+3. 💧 Use alternative water sources
+4. 🏥 Seek medical attention if symptoms appear
+
+**Testing Available:**
+- Campus water testing lab
+- Portable test kits at security
+- Free testing for students`);
+    }
+    function askLowPressure() { 
+      chatManager.addUserMessage('What causes low water pressure and how to fix it?');
+      simulateAIResponse(`💦 **Low Water Pressure Solutions**
+
+**Common Causes:**
+1. 🚰 Partially closed main valve
+2. 🔧 Clogged pipes or aerators
+3. 💧 Multiple simultaneous users
+4. 🏗️ Construction work on campus
+5. 🔄 Pump or tank issues
+
+**Quick Fixes:**
+- 🔄 Clean faucet aerators and showerheads
+- 🚰 Check if main valve is fully open
+- ⏰ Use water during off-peak hours
+- 📞 Report to maintenance: **EXT 1234**
+
+**Campus-Specific:**
+- 🕖 Peak hours: 7-9 AM, 6-8 PM (avoid these times)
+- 🏢 High-usage buildings: Hostels, Cafeteria
+- 🔄 Scheduled maintenance every Wednesday
+
+**Emergency Response:**
+- ⏱️ Maintenance team: 30-minute response
+- 🚰 Temporary water supply arrangements
+- 📱 Real-time updates on AquaX app
+
+**Prevention:**
+- 💧 Report leaks immediately
+- 🔧 Regular pipe maintenance
+- 📊 Monitor pressure with AquaX app`);
+    }
+    function askTankerInfo() { 
+      chatManager.addUserMessage('What is the water tanker schedule?');
+      simulateAIResponse(`🚚 **Water Tanker Schedule - Karunya University**
+
+**Regular Schedule:**
+- 🗓️ **Monday, Wednesday, Friday:**
+  - 🕘 9:00 AM - Boys Hostel Area
+  - 🕚 11:00 AM - Girls Hostel Area  
+  - 🕑 2:00 PM - Faculty Quarters
+
+- 🗓️ **Tuesday, Thursday, Saturday:**
+  - 🕘 9:00 AM - Academic Blocks
+  - 🕚 11:00 AM - Administrative Area
+  - 🕑 2:00 PM - Sports Complex
+
+**Emergency Tanker Service:**
+- 🚨 Available 24/7 during water shortages
+- 📞 Contact: **1066** or **EXT 5678**
+- ⏱️ Response time: 45 minutes
+
+**Tanker Capacity:**
+- 💧 5000 liters per trip
+- 🚛 2 tankers always on standby
+- 📍 Filling points: Near main gate
+
+**Real-time Tracking:**
+- 📱 Live location on AquaX app
+- 🔔 SMS notifications for delays
+- 🗺️ Interactive map with ETA
+
+**Contact Information:**
+- 🏢 Water Department: **EXT 5678**
+- 📞 Tanker Control Room: **EXT 5679**
+- 📧 Email: tanker@karunya.edu.in`);
+    }
+    function askConservation() { 
+      chatManager.addUserMessage('How can I conserve water in hostel?');
+      simulateAIResponse(`💧 **Water Conservation Tips for Hostels**
+
+**In Bathrooms:**
+- 🚿 Take shorter showers (5 minutes max)
+- 🔄 Turn off tap while brushing/shaving
+- 🚽 Use dual-flush toilets properly
+- 🚰 Report leaking taps immediately
+
+**In Laundry:**
+- 👕 Full loads only in washing machines
+- 💧 Use eco-mode when available
+- 🧼 Reuse towel for multiple days
+- 🌊 Collect rinse water for cleaning
+
+**In Kitchen:**
+- 🍽️ Use washing basin instead of running tap
+- ❄️ Defrost food in refrigerator, not water
+- 🥤 Keep drinking water in fridge (no running tap)
+- 🍳 Use minimal water for cooking
+
+**General Tips:**
+- 📊 Monitor usage with AquaX app
+- 🏆 Participate in water conservation competitions
+- 📚 Attend water conservation workshops
+- 🔍 Report water wastage anonymously
+
+**Campus Initiatives:**
+- 🌧️ Rainwater harvesting systems
+- 💧 Water recycling for gardening
+- 📱 Real-time usage monitoring
+- 🏆 Conservation awards for hostels
+
+**Impact:**
+- 💰 Save on water bills
+- 🌍 Protect environment
+- 💪 Ensure sustainable supply
+- 🏆 Earn AquaX conservation points`);
+    }
+    function askHealthTips() { 
+      chatManager.addUserMessage('What are important water health tips?');
+      simulateAIResponse(`❤️ **Water Health & Safety Tips**
+
+**Drinking Water Safety:**
+- 💧 Drink 2-3 liters of water daily
+- 🚰 Use only purified/boiled water
+- 🧊 Avoid ice from unknown sources
+- 🍶 Clean water containers regularly
+
+**Hygiene Practices:**
+- 🧼 Wash hands before handling food/water
+- 🚿 Regular bathing with clean water
+- 🦷 Use safe water for brushing teeth
+- 🍽️ Clean utensils with purified water
+
+**Illness Prevention:**
+- 🤢 Boil water during contamination alerts
+- 💊 Use water purification tablets when needed
+- 🏥 Report water-borne illnesses immediately
+- 🧴 Maintain personal water bottles
+
+**Seasonal Tips:**
+- ☀️ **Summer:** Increase water intake, watch for dehydration
+- 🌧️ **Monsoon:** Be extra cautious about water quality
+- ❄️ **Winter:** Don't reduce water consumption
+
+**Campus Health Services:**
+- 🏥 Medical center for water-related illnesses
+- 💊 Free ORS packets during emergencies
+- 📚 Health education workshops
+- 🔬 Regular water quality testing
+
+**Emergency Contacts:**
+- 🏥 Campus Hospital: **EXT 1000**
+- 💊 Pharmacy: **EXT 1001**
+- 🚑 Ambulance: **108**`);
+    }
+    function askRainwater() { 
+      chatManager.addUserMessage('Tell me about rainwater harvesting at Karunya');
+      simulateAIResponse(`🌧️ **Rainwater Harvesting at Karunya**
+
+**System Overview:**
+- 🏫 All campus buildings equipped with RWH
+- 💧 Annual collection: 5 million liters
+- 🌊 Recharge pits: 25 across campus
+- 🏗️ Integrated with landscape design
+
+**Collection Points:**
+- 🏢 Academic building rooftops
+- 🏠 Hostel terraces and common areas
+- 🏛️ Administrative block
+- 🏟️ Sports complex
+
+**Usage:**
+- 🌳 Landscape irrigation
+- 🚽 Toilet flushing
+- 🧹 Cleaning purposes
+- 🔄 Groundwater recharge
+
+**Benefits:**
+- 💰 Reduces municipal water demand
+- 🌍 Eco-friendly water source
+- 💧 Improves groundwater levels
+- 📚 Educational demonstration
+
+**Maintenance:**
+- 🧹 Regular cleaning of collection surfaces
+- 🔧 Periodic system checks
+- 📊 Monitoring through AquaX platform
+- 🎯 Student maintenance teams
+
+**Student Involvement:**
+- 👥 RWH maintenance clubs
+- 📚 Research projects
+- 🏆 Conservation competitions
+- 💡 Innovation challenges
+
+**Achievements:**
+- 🏆 National award for water conservation
+- 💧 30% reduction in municipal water use
+- 🌱 Model for other educational institutions`);
+    }
+    function askContactInfo() { 
+      chatManager.addUserMessage('What are the water authority contact details?');
+      simulateAIResponse(`📞 **Water Authorities - Contact Information**
+
+**Campus Contacts:**
+- 🏢 Water Department Office: **EXT 5678**
+- 🔧 Maintenance & Repairs: **EXT 1234**
+- 🚨 Emergency (24/7): **1066**
+- 📧 Email: water@karunya.edu.in
+
+**Municipal Contacts:**
+- 💧 Coimbatore Water Board: **0422-2301000**
+- 🚰 Water Complaints: **044-45674567**
+- 🏢 District Water Office: **0422-2392000**
+
+**Emergency Services:**
+- 🚑 Medical Emergency: **108**
+- 🚒 Fire Department: **101**
+- 🚨 Police: **100**
+- 🆘 Disaster Management: **1077**
+
+**Online Reporting:**
+- 🌐 AquaX Portal: aquax.edu.in/report
+- 📱 Mobile App: AquaX (Download from Play Store)
+- 💬 WhatsApp: **+91-XXXX-XXXXX**
+- 📧 Email: report@aquax.edu.in
+
+**Office Hours:**
+- 🏢 Administrative: 9:00 AM - 5:00 PM (Mon-Sat)
+- 🔧 Maintenance: 8:00 AM - 8:00 PM (Daily)
+- 🚨 Emergency: 24/7
+
+**Response Times:**
+- ⚡ Critical Issues: 15 minutes
+- 🔧 Repairs: 30 minutes - 2 hours
+- 💧 Supply Issues: 1-4 hours
+- 📋 General Inquiries: 24 hours`);
+    }
+    function askLaundryInfo() { 
+      chatManager.addUserMessage('How does the laundry service work?');
+      simulateAIResponse(`👕 **Campus Laundry Services**
+
+**Service Locations:**
+- 🏢 Central Laundry: Near Boys Hostel Block A
+- 🏠 Hostel Laundry Rooms: All hostel blocks
+- 🕒 Timing: 8:00 AM - 8:00 PM Daily
+
+**Pricing:**
+- 👕 Washing: ₹30 per load
+- 🔥 Ironing: ₹15 per item
+- 🧼 Dry Cleaning: ₹50 per item
+- 💧 Water Saving Mode: 20% discount
+
+**Process:**
+1. 📝 Fill laundry form at counter
+2. 🏷️ Get token number
+3. ⏱️ Collection in 4-6 hours
+4. ✅ Quality check before pickup
+
+**Water Conservation:**
+- 💧 Eco-friendly detergents used
+- 🌊 Water recycling system
+- 📊 Real-time water usage tracking
+- 🏆 Green laundry certification
+
+**Special Services:**
+- 🚀 Express Service (2 hours): +50%
+- 🌙 After-hours pickup: Security desk
+- 📦 Bulk discount for groups
+- 🎓 Student volunteer program
+
+**Contact:**
+- 📞 Laundry Office: **EXT 3456**
+- 📱 WhatsApp: **+91-XXXX-XXXXX**
+- 🌐 Online Booking: aquax.edu.in/laundry
+
+**AquaX Integration:**
+- 📱 Real-time status on app
+- 🔔 SMS notifications
+- 💳 Digital payments accepted
+- 📊 Water savings tracker`);
+    }
+
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize language switcher
+      const langSwitcher = document.getElementById('langSwitcher');
+      if (langSwitcher) {
+        langSwitcher.value = localStorage.getItem('ax_lang') || 'en';
+        langSwitcher.addEventListener('change', (e) => {
+          localStorage.setItem('ax_lang', e.target.value);
+          chatManager.addSystemMessage(`Language changed to ${e.target.value}`, 'info');
+        });
+      }
+
+      // Initialize chat manager
+      chatManager = new ChatManager();
+      window.chatManager = chatManager;
+
+      // Auto-focus chat input
+      document.getElementById('chatInput').focus();
+    });
+  </script>
+</body>
+</html>

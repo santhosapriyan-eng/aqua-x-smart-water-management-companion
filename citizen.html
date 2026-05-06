@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>AquaX — Citizen Services</title>
+  <link rel="stylesheet" href="styles/base.css"/>
+  <link rel="stylesheet" href="styles/citizen.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <script src="/socket.io/socket.io.js"></script>
+  <script defer src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script defer src="scripts/voice.js"></script>
+  <script defer src="scripts/alerts.js"></script>
+  <script defer src="scripts/gamification.js"></script>
+  <script defer src="scripts/map.js"></script>
+  <script defer src="scripts/lang.js"></script>
+  <script defer src="scripts/citizen.init.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">💧</div>
+      <span>AquaX — Citizen</span>
+    </div>
+    <nav class="nav">
+      <a href="index.html" class="nav-link">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-text">Home</span>
+      </a>
+      <a href="map.html" class="nav-link">
+        <span class="nav-icon">🗺️</span>
+        <span class="nav-text">Map</span>
+      </a>
+      <a href="chat.html" class="nav-link">
+        <span class="nav-icon">🤖</span>
+        <span class="nav-text">Assistant</span>
+      </a>
+      <a href="leaderboard.html" class="nav-link">
+        <span class="nav-icon">🏆</span>
+        <span class="nav-text">Leaderboard</span>
+      </a>
+    </nav>
+    <div class="controls">
+      <button id="voiceControl" class="btn icon" aria-label="Voice Control">🎤</button>
+      <select id="langSwitcher" class="lang-selector">
+        <option value="en">English</option>
+        <option value="hi">हिन्दी</option>
+        <option value="ta">தமிழ்</option>
+        <option value="te">తెలుగు</option>
+        <option value="kn">ಕನ್ನಡ</option>
+        <option value="ml">മലയാളം</option>
+      </select>
+      <button id="simpleModeBtn" class="btn icon" title="Simple UI Mode">👵</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Emergency SOS Banner -->
+    <div class="emergency-banner" id="emergencyBanner">
+      <div class="emergency-content">
+        <span class="emergency-icon">🚨</span>
+        <div class="emergency-text">
+          <strong>EMERGENCY MODE ACTIVATED</strong>
+          <span>Help is on the way! Stay calm.</span>
+        </div>
+        <button class="btn small" id="closeEmergency">Close</button>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- Left Column - Reporting -->
+      <div class="column">
+        <!-- Report Issue Card -->
+        <section class="card report-card">
+          <div class="card-header">
+            <h2>Report Water Issue</h2>
+            <div class="points-display">
+              <span class="points-label">Your Points:</span>
+              <span class="points-value" id="pointsValue">0</span>
+            </div>
+          </div>
+          
+          <form id="reportForm" class="form">
+            <div class="form-group">
+              <label for="issueType" class="form-label">Issue Type</label>
+              <select id="issueType" class="form-select" required>
+                <option value="">Select issue type...</option>
+                <option value="leak">💧 Water Leak</option>
+                <option value="contamination">🤢 Water Contamination</option>
+                <option value="lowpressure">💦 Low Water Pressure</option>
+                <option value="nowater">🚱 No Water Supply</option>
+                <option value="tanker">🚚 Tanker Delay</option>
+                <option value="drainage">🌊 Drainage Problem</option>
+                <option value="other">❓ Other Issue</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="severity" class="form-label">Severity Level</label>
+              <div class="severity-options">
+                <label class="severity-option">
+                  <input type="radio" name="severity" value="low" required>
+                  <span class="severity-indicator low"></span>
+                  <span class="severity-text">Low - Minor Issue</span>
+                </label>
+                <label class="severity-option">
+                  <input type="radio" name="severity" value="medium">
+                  <span class="severity-indicator medium"></span>
+                  <span class="severity-text">Medium - Needs Attention</span>
+                </label>
+                <label class="severity-option">
+                  <input type="radio" name="severity" value="high">
+                  <span class="severity-indicator high"></span>
+                  <span class="severity-text">High - Urgent</span>
+                </label>
+                <label class="severity-option">
+                  <input type="radio" name="severity" value="critical">
+                  <span class="severity-indicator critical"></span>
+                  <span class="severity-text">Critical - Emergency</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="location" class="form-label">Location</label>
+              <div class="location-input">
+                <input type="text" id="location" placeholder="Enter location or use auto-detect" class="form-input">
+                <button type="button" id="btnLocate" class="btn outline">📍 Auto-detect</button>
+              </div>
+              <div class="location-coordinates">
+                <span>Lat: <span id="latValue">--</span></span>
+                <span>Lng: <span id="lngValue">--</span></span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="description" class="form-label">Description</label>
+              <textarea id="description" class="form-textarea" placeholder="Describe the issue in detail..." rows="3"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Add Media (Optional)</label>
+              <div class="media-options">
+                <button type="button" class="btn media-btn" id="btnPhoto">
+                  <span class="media-icon">📷</span>
+                  Take Photo
+                </button>
+                <button type="button" class="btn media-btn" id="btnGallery">
+                  <span class="media-icon">🖼️</span>
+                  From Gallery
+                </button>
+                <input type="file" id="fileInput" accept="image/*,video/*" style="display: none;">
+              </div>
+              <div id="mediaPreview" class="media-preview"></div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn primary large" id="btnSubmit">
+                <span class="btn-icon">📤</span>
+                Submit Report
+              </button>
+              <button type="button" class="btn outline" id="btnSaveDraft">
+                <span class="btn-icon">💾</span>
+                Save Draft
+              </button>
+            </div>
+          </form>
+
+          <!-- Emergency SOS Section -->
+          <div class="emergency-section">
+            <div class="emergency-header">
+              <span class="emergency-icon">🚨</span>
+              <h3>Emergency SOS</h3>
+            </div>
+            <p class="emergency-description">
+              Use only for life-threatening situations, major contamination, or immediate danger.
+            </p>
+            <button class="btn danger large pulse" id="btnSOS">
+              <span class="btn-icon">🚨</span>
+              EMERGENCY SOS
+            </button>
+            <div class="emergency-contacts">
+              <strong>Emergency Contacts:</strong>
+              <span>Campus Security: 1066</span>
+              <span>Water Emergency: 1800-XXX-XXXX</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Quick Actions Card -->
+        <section class="card">
+          <h3>Quick Actions & Education</h3>
+          <div class="quick-actions-grid">
+            <button class="action-btn" id="btnBoil">
+              <span class="action-icon">🔥</span>
+              <span class="action-text">Boil Water Guide</span>
+            </button>
+            <button class="action-btn" id="btnChlor">
+              <span class="action-icon">🧪</span>
+              <span class="action-text">Chlorination</span>
+            </button>
+            <button class="action-btn" id="btnPurify">
+              <span class="action-icon">💧</span>
+              <span class="action-text">Purification</span>
+            </button>
+            <button class="action-btn" id="btnQuiz">
+              <span class="action-icon">❓</span>
+              <span class="action-text">Safety Quiz</span>
+            </button>
+            <button class="action-btn" id="btnVideos">
+              <span class="action-icon">🎥</span>
+              <span class="action-text">Safety Videos</span>
+            </button>
+            <button class="action-btn" id="btnChecklist">
+              <span class="action-icon">✅</span>
+              <span class="action-text">Safety Checklist</span>
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <!-- Right Column - Alerts & Status -->
+      <div class="column">
+        <!-- Real-time Alerts Card -->
+        <section class="card alerts-card">
+          <div class="card-header">
+            <h3>Real-time Alerts</h3>
+            <button class="btn icon small" id="btnRefreshAlerts" title="Refresh Alerts">🔄</button>
+          </div>
+          <div id="alertsContainer" class="alerts-container">
+            <div class="alert-item new">
+              <div class="alert-header">
+                <span class="alert-badge critical">CRITICAL</span>
+                <span class="alert-time">2 min ago</span>
+              </div>
+              <div class="alert-message">Major water leak reported in Block B</div>
+              <div class="alert-location">📍 Near Main Auditorium</div>
+            </div>
+            <div class="alert-item">
+              <div class="alert-header">
+                <span class="alert-badge warning">WARNING</span>
+                <span class="alert-time">15 min ago</span>
+              </div>
+              <div class="alert-message">Low water pressure in Girls Hostel</div>
+              <div class="alert-location">📍 Hostel Zone</div>
+            </div>
+            <div class="alert-item">
+              <div class="alert-header">
+                <span class="alert-badge info">INFO</span>
+                <span class="alert-time">1 hour ago</span>
+              </div>
+              <div class="alert-message">Scheduled maintenance completed</div>
+              <div class="alert-location">📍 Water Treatment Plant</div>
+            </div>
+          </div>
+          <div class="alerts-footer">
+            <span class="muted">Live updates every 30 seconds</span>
+          </div>
+        </section>
+
+        <!-- Water Status Card -->
+        <section class="card status-card">
+          <h3>Campus Water Status</h3>
+          <div class="status-grid">
+            <div class="status-item">
+              <div class="status-icon quality">💧</div>
+              <div class="status-info">
+                <div class="status-label">Water Quality</div>
+                <div class="status-value excellent">Excellent</div>
+              </div>
+            </div>
+            <div class="status-item">
+              <div class="status-icon pressure">💦</div>
+              <div class="status-info">
+                <div class="status-label">Pressure</div>
+                <div class="status-value normal">Normal</div>
+              </div>
+            </div>
+            <div class="status-item">
+              <div class="status-icon supply">🚰</div>
+              <div class="status-info">
+                <div class="status-label">Supply Status</div>
+                <div class="status-value stable">Stable</div>
+              </div>
+            </div>
+            <div class="status-item">
+              <div class="status-icon maintenance">🔧</div>
+              <div class="status-info">
+                <div class="status-label">Maintenance</div>
+                <div class="status-value scheduled">Scheduled</div>
+              </div>
+            </div>
+          </div>
+          <div class="status-update">
+            Last updated: <span id="lastUpdate">Just now</span>
+          </div>
+        </section>
+
+        <!-- Recent Reports Card -->
+        <section class="card">
+          <div class="card-header">
+            <h3>Your Recent Reports</h3>
+            <span class="badge" id="reportsCount">0</span>
+          </div>
+          <div id="reportsList" class="reports-list">
+            <div class="empty-state">
+              <div class="empty-icon">📝</div>
+              <p>No reports yet</p>
+              <small>Submit your first water issue report</small>
+            </div>
+          </div>
+          <div class="card-footer">
+            <a href="map.html" class="link">View all on map →</a>
+          </div>
+        </section>
+
+        <!-- Emergency Preparedness Card -->
+        <section class="card emergency-prep">
+          <h3>Emergency Preparedness</h3>
+          <div class="prep-items">
+            <div class="prep-item">
+              <span class="prep-icon">🆘</span>
+              <div class="prep-content">
+                <strong>Emergency Kit</strong>
+                <span>Always keep water purification tablets</span>
+              </div>
+            </div>
+            <div class="prep-item">
+              <span class="prep-icon">📞</span>
+              <div class="prep-content">
+                <strong>Emergency Numbers</strong>
+                <span>Save: 1066, 1800-XXX-XXXX</span>
+              </div>
+            </div>
+            <div class="prep-item">
+              <span class="prep-icon">📍</span>
+              <div class="prep-content">
+                <strong>Safe Water Locations</strong>
+                <span>Know your nearest safe water source</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- Voice Interface -->
+  <div id="voiceInterface" class="voice-interface hidden">
+    <div class="voice-modal">
+      <div class="voice-header">
+        <h3>Voice Report Assistant</h3>
+        <button id="closeVoice" class="btn icon">✕</button>
+      </div>
+      <div class="voice-status">
+        <div class="pulse-ring"></div>
+        <div class="voice-icon">🎤</div>
+      </div>
+      <p class="voice-instruction">Describe your water issue...</p>
+      <div class="voice-commands">
+        <p>Try saying:</p>
+        <ul>
+          <li>"Report water leak in bathroom"</li>
+          <li>"No water in my hostel"</li>
+          <li>"Brown water coming from tap"</li>
+          <li>"Low pressure in kitchen"</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Emergency SOS Modal -->
+  <div id="sosModal" class="modal-overlay hidden">
+    <div class="modal-content emergency-modal">
+      <div class="modal-header">
+        <h2>🚨 EMERGENCY SOS</h2>
+        <button class="btn icon" id="closeSOS">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="sos-warning">
+          <div class="sos-icon">⚠️</div>
+          <p>This will alert campus authorities and emergency services immediately.</p>
+          <p><strong>Use only for genuine emergencies!</strong></p>
+        </div>
+        
+        <div class="sos-options">
+          <label class="sos-option">
+            <input type="radio" name="emergencyType" value="contamination" required>
+            <span class="sos-option-content">
+              <strong>Water Contamination</strong>
+              <span>Chemical spill, sewage mix, health risk</span>
+            </span>
+          </label>
+          
+          <label class="sos-option">
+            <input type="radio" name="emergencyType" value="flooding" required>
+            <span class="sos-option-content">
+              <strong>Major Flooding</strong>
+              <span>Building flooding, water damage</span>
+            </span>
+          </label>
+          
+          <label class="sos-option">
+            <input type="radio" name="emergencyType" value="structural" required>
+            <span class="sos-option-content">
+              <strong>Structural Damage</strong>
+              <span>Pipe burst, building damage</span>
+            </span>
+          </label>
+          
+          <label class="sos-option">
+            <input type="radio" name="emergencyType" value="health" required>
+            <span class="sos-option-content">
+              <strong>Health Emergency</strong>
+              <span>Water-related illness, poisoning</span>
+            </span>
+          </label>
+        </div>
+
+        <div class="sos-description">
+          <label>Emergency Description</label>
+          <textarea id="sosDescription" placeholder="Briefly describe the emergency situation..." rows="3"></textarea>
+        </div>
+
+        <div class="sos-location">
+          <label>Your Current Location</label>
+          <div class="location-display">
+            <span id="sosLocation">Detecting location...</span>
+            <button type="button" class="btn small outline" id="sosUpdateLocation">Update</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" id="cancelSOS">Cancel</button>
+        <button class="btn danger large" id="confirmSOS">
+          🚨 CONFIRM EMERGENCY SOS
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <span>AquaX Citizen Services • Report issues, get help, stay informed</span>
+      <span>Emergency: 1066 • Non-emergency: 1800-XXX-XXXX</span>
+    </div>
+  </footer>
+
+  <script>
+    // Initialize citizen page
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('Citizen page initialized');
+      
+      // Initialize language switcher
+      const langSwitcher = document.getElementById('langSwitcher');
+      if (langSwitcher) {
+        langSwitcher.value = localStorage.getItem('ax_lang') || 'en';
+        langSwitcher.addEventListener('change', (e) => {
+          localStorage.setItem('ax_lang', e.target.value);
+          location.reload();
+        });
+      }
+
+      // Simple UI mode toggle
+      const simpleModeBtn = document.getElementById('simpleModeBtn');
+      simpleModeBtn?.addEventListener('click', () => {
+        document.body.classList.toggle('simple-mode');
+        simpleModeBtn.textContent = document.body.classList.contains('simple-mode') ? '👵' : '👴';
+        alert('Simple UI mode ' + (document.body.classList.contains('simple-mode') ? 'enabled' : 'disabled'));
+      });
+    });
+  </script>
+</body>
+</html>
